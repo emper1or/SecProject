@@ -1,8 +1,11 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from .forms import AuthorForm, BookForm, BookCoverForm
-from .models import Author, Book, BookCover
+
+from .forms import BookForm, BookCoverForm
+from .models import Author
 
 
+@login_required
 def add_author(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -12,7 +15,7 @@ def add_author(request):
             return redirect('add_book')  # Перенаправляем на страницу добавления книги
     return render(request, 'add_author.html')
 
-
+@login_required
 def add_book(request):
     authors = Author.objects.all()
 
@@ -25,6 +28,9 @@ def add_book(request):
             book = book_form.save(commit=False)
             book.author = book_form.cleaned_data['author']
             book.save()
+
+            # Добавляем текущего пользователя к книге
+            book.users.add(request.user)
 
             # Сохраняем обложку, связывая с книгой
             cover = cover_form.save(commit=False)
@@ -43,5 +49,6 @@ def add_book(request):
     })
 
 
+@login_required
 def success(request):
     return render(request, 'success.html')
