@@ -17,9 +17,10 @@ class RegisterForm(UserCreationForm):
         self.fields['password1'].label = 'Пароль'
         self.fields['password2'].label = 'Подтверждение пароля'
 
-        self.fields['username'].help_text = 'Не более 150 символов.<br /> Только буквы, цифры и @/./+/-/_.'
+        self.fields['username'].help_text = ('Не более 150 символов. \n'
+                                             'Только буквы, цифры и @/./+/-/_.')
         self.fields['password1'].help_text = (
-            'Ваш пароль должен содержать не менее 8 символов.<br />'
+            'Ваш пароль должен содержать не менее 8 символов. \n'
             'Ваш пароль не может состоять только из цифр.'
         )
         self.fields['password2'].help_text = 'Повторите пароль для подтверждения.'
