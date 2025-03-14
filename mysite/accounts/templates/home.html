@@ -1,10 +1,16 @@
-{% extends 'base.html' %}
+{% extends 'index.html' %}
 
 {% block content %}
-<h1>Добро пожаловать в библиотеку!</h1>
-{% if user.is_authenticated %}
-    <p>Вы вошли как {{ user.username }}. <a href="{% url 'dashboard' %}">Перейти в личный кабинет</a></p>
-{% else %}
-    <p><a href="{% url 'login' %}">Войти</a> или <a href="{% url 'register' %}">Зарегистрироваться</a></p>
-{% endif %}
+<div class="container mt-5">
+    <h1 class="display-4 text-center">Добро пожаловать в библиотеку!</h1>
+    <div class="text-center mt-4">
+        {% if user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">Перейти в личный кабинет</a>
+        {% else %}
+            <p class="lead">Пожалуйста, войдите или зарегистрируйтесь.</p>
+            <a href="{% url 'login' %}" class="btn btn-primary btn-lg me-2">Войти</a>
+            <a href="{% url 'register' %}" class="btn btn-secondary btn-lg">Зарегистрироваться</a>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

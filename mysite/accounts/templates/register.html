@@ -1,11 +1,55 @@
-{% extends 'base.html' %}
+{% extends 'index.html' %}
 
 {% block content %}
-<h1>Регистрация</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Зарегистрироваться</button>
-</form>
-<p>Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></p>
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow-lg p-4" style="max-width: 400px; width: 100%;">
+        <h2 class="text-center text-primary">Регистрация</h2>
+
+        <!-- Сообщения об ошибках -->
+        {% if form.errors %}
+            <div class="alert alert-danger" role="alert">
+                <strong>Ошибка!</strong> Пожалуйста, исправьте следующие ошибки:
+                <ul>
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            <!-- Поля формы -->
+            {% for field in form %}
+                <div class="mb-3">
+                    <label for="{{ field.id_for_label }}" class="form-label" style="color: #000000;">{{ field.label }}</label>
+                    <br>
+                    {{ field }}
+                    <br>
+                    {% if field.help_text %}
+                        <small class="form-text text-muted"> {{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in field.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <!-- Кнопка отправки формы -->
+            <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+        </form>
+
+        <!-- Ссылка на вход -->
+        <div class="text-center mt-3">
+            <p style="color: #000000;">Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></p>
+        </div>
+    </div>
+</div>
 {% endblock %}

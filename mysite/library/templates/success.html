@@ -1,13 +1,24 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Успешно</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <!-- Подключение Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/bootstrap_styles.css' %}">
 </head>
 <body>
-    <h1>Данные успешно сохранены!</h1>
-    <a href="{% url 'add_book' %}">Добавить еще одну книгу</a>
-    <a href="{% url 'dashboard' %}"> Вернуться в личный кабинет</a>
+    <div class="container text-center mt-5">
+        <h1 class="display-4 mb-4">Данные успешно сохранены!</h1>
+        <div class="d-grid gap-3 d-md-block">
+            <a href="{% url 'add_book' %}" class="btn btn-primary btn-lg">Добавить еще одну книгу</a>
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-lg">Вернуться в личный кабинет</a>
+        </div>
+    </div>
+
+    <!-- Подключение Bootstrap JS (необязательно, если не используются компоненты JS) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
