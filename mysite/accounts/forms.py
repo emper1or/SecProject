@@ -6,14 +6,16 @@ User = get_user_model()
 
 
 class RegisterForm(UserCreationForm):
+    email = forms.EmailField(required=True)
     class Meta:
         model = User
-        fields = ['username', 'password1', 'password2']
+        fields = ['username', 'email', 'password1', 'password2']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.fields['username'].label = 'Имя пользователя'
+        self.fields['email'].label = 'Почта'
         self.fields['password1'].label = 'Пароль'
         self.fields['password2'].label = 'Подтверждение пароля'
 
@@ -25,4 +27,16 @@ class RegisterForm(UserCreationForm):
         )
         self.fields['password2'].help_text = 'Повторите пароль для подтверждения.'
 
+        def save(self, commit=True):
+            user = super().save(commit=False)
+            user.email = self.cleaned_data['email']
+            if commit:
+                user.save()
+            return user
 
+class VerificationForm(forms.Form):
+    verification_code = forms.CharField(
+        label="Код верификации",
+        max_length=6,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )

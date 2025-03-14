@@ -123,3 +123,32 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+#EMAIL_BACKEND = 'django_mailpost.EmailBackend'  # Используем бэкенд MailoPost
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587 # Или 465 для SSL
+EMAIL_USE_TLS = True # Или EMAIL_USE_SSL = True для SSL
+EMAIL_HOST_USER = '@gmail.com' # Ваш Gmail
+EMAIL_HOST_PASSWORD = '' # Пароль или пароль приложения
+
+DEFAULT_FROM_EMAIL = '@gmail.com'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'accounts.views': {  # Замени 'your_app_name.views' на путь к твоему модулю с views.py
+            'handlers': ['console'],
+            'level': 'ERROR',  # Или 'INFO' для более подробных логов
+        },
+    },
+}
+
+

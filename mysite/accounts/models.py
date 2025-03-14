@@ -1,8 +1,12 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+import random
 
 class CustomUser(AbstractUser):
+    email = models.EmailField(unique=True)  # Обязательное поле email
+    verification_code = models.CharField(max_length=6, blank=True, null=True)
+    verification_attempts = models.IntegerField(default=0)
+
     groups = models.ManyToManyField(
         'auth.Group',
         verbose_name='groups',
@@ -19,3 +23,10 @@ class CustomUser(AbstractUser):
         related_name='customuser_set',
         related_query_name='user',
     )
+
+    def generate_verification_code(self):
+        return str(random.randint(100000, 999999))
+
+    def reset_verification_attempts(self):
+        self.verification_attempts = 0
+        self.save()
