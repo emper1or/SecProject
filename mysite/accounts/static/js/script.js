@@ -1,14 +1,26 @@
+
+
+// Ждем, пока весь DOM загрузится
 document.addEventListener('DOMContentLoaded', function () {
+    // Находим элемент "глазика"
     const togglePassword = document.getElementById('togglePassword');
-    const password = document.getElementById('password');
 
-    if (togglePassword && password) {
+    // Добавляем обработчик события на клик
+    if (togglePassword) {
         togglePassword.addEventListener('click', function () {
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
 
-            this.classList.toggle('fa-eye');
-            this.classList.toggle('fa-eye-slash');
+            // Переключаем тип поля ввода
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text'; // Показываем пароль
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash'); // Меняем иконку на "глаз закрыт" (перечёркнутый)
+            } else {
+                passwordInput.type = 'password'; // Скрываем пароль
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye'); // Меняем иконку на "глаз открыт"
+            }
         });
     }
 });

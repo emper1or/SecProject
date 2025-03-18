@@ -1,9 +1,10 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import validate_email
 from django.db import models
 import random
 
 class CustomUser(AbstractUser):
-    email = models.EmailField(unique=True)  # Обязательное поле email
+    email = models.EmailField(unique=True, validators=[validate_email])
     verification_code = models.CharField(max_length=6, blank=True, null=True)
     verification_attempts = models.IntegerField(default=0)
 

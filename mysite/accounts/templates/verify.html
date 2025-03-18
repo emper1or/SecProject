@@ -7,21 +7,21 @@
 
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+                    <div class="alert alert-{{ message.tags }}" role="alert" style="color: black">{{ message }}</div>
                 {% endfor %}
             {% endif %}
 
             <form method="post">
                 {% csrf_token %}
                 <div class="mb-3">
-                    {{ form.label_tag }}
+                    <label class="form-label black-text">{{ form.label_tag }}</label>
                     {{ form }}
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Подтвердить</button>
             </form>
 
             {% if remaining_attempts > 0 %}
-                <p>Осталось попыток: {{ remaining_attempts }}</p>
+                <p style="color: black">Осталось попыток: {{ remaining_attempts }}</p>
                 <p><a href="{% url 'login' %}">Отправить код еще раз</a></p>
             {% endif %}
         </div>
