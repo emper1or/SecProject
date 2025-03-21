@@ -1,12 +1,43 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Добавить книгу</title>
-    <!-- Подключение Bootstrap CSS -->
     <link rel="stylesheet" href="{% static 'css/bootstrap_styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom_styles.css' %}">
+    <style>
+        .preview-container {
+            position: relative;
+            display: inline-block;
+            max-width: 300px;
+        }
+        .preview-container img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        #close-preview {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: block;
+        }
+        #close-preview:hover {
+            background: darkred;
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
@@ -15,20 +46,19 @@
             {% csrf_token %}
             <fieldset class="mb-4">
                 <legend class="fs-4">Информация о книге</legend>
-                <!-- Рендеринг формы книги с использованием Bootstrap -->
                 {% for field in book_form %}
-                    <div class="mb-3">
-                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                        {{ field }}
-                        {% if field.help_text %}
-                            <small class="form-text text-muted">{{ field.help_text }}</small>
-                        {% endif %}
-                        {% if field.errors %}
-                            <div class="invalid-feedback">
-                                {{ field.errors }}
-                            </div>
-                        {% endif %}
-                    </div>
+                    {% if field.name != "rating" %}  <!-- Убираем старое поле рейтинга -->
+                        <div class="mb-3 form-group">
+                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="invalid-feedback">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                 {% endfor %}
                 <p>
                     <a href="{% url 'add_author' %}" class="btn btn-secondary">Добавить нового автора</a>
@@ -36,29 +66,87 @@
             </fieldset>
 
             <fieldset class="mb-4">
+                <legend class="fs-4">Рейтинг книги</legend>
+                <div class="rating" id="rating-container">
+                    {% for i in "1234567891" %}
+                        <span class="star" data-value="{{ forloop.counter }}">&#9733;</span>
+                    {% endfor %}
+                    <span id="rating-value"></span>
+                </div>
+            </fieldset>
+
+            <fieldset class="mb-4">
                 <legend class="fs-4">Обложка книги</legend>
-                <!-- Рендеринг формы обложки с использованием Bootstrap -->
-                {% for field in cover_form %}
-                    <div class="mb-3">
-                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                        {{ field }}
-                        {% if field.help_text %}
-                            <small class="form-text text-muted">{{ field.help_text }}</small>
-                        {% endif %}
-                        {% if field.errors %}
-                            <div class="invalid-feedback">
-                                {{ field.errors }}
-                            </div>
-                        {% endif %}
+                <div class="mb-3">
+                    <label class="form-label">Загрузить обложку:</label>
+                    <label class="file-upload-container">
+                        <img src="https://exotickozha.ru/userfiles/2849815-document-download-file-interface-multimedia_107994.png" alt="Upload">
+                        <input type="file" name="cover" id="cover-upload">
+                    </label>
+                    <div id="cover-preview" class="mt-2 preview-container" style="display: none;">
+                        <button id="close-preview">&times;</button>
+                        <img id="cover-image" src="" class="img-thumbnail">
                     </div>
-                {% endfor %}
+                </div>
             </fieldset>
 
             <button type="submit" class="btn btn-primary">Сохранить</button>
         </form>
     </div>
 
-    <!-- Подключение Bootstrap JS (необязательно, если не используются компоненты JS) -->
+    <a href="http://127.0.0.1:8000/dashboard/" class="back-button">⬅ Вернуться назад</a>
+
+
+
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let stars = document.querySelectorAll(".star");
+            let ratingValue = document.getElementById("rating-value");
+            let ratingContainer = document.getElementById("rating-container");
+            let coverUpload = document.getElementById("cover-upload");
+            let coverPreview = document.getElementById("cover-preview");
+            let coverImage = document.getElementById("cover-image");
+            let closePreview = document.getElementById("close-preview");
+
+            stars.forEach((star, index) => {
+                star.addEventListener("mouseover", function() {
+                    stars.forEach((s, i) => {
+                        s.classList.toggle("hovered", i <= index);
+                    });
+                    ratingValue.textContent = `${index + 1} / 10`;
+                });
+
+                star.addEventListener("mouseout", function() {
+                    stars.forEach(s => s.classList.remove("hovered"));
+                });
+
+                star.addEventListener("click", function() {
+                    stars.forEach((s, i) => {
+                        s.classList.remove("selected");
+                        if (i <= index) {
+                            s.classList.add("selected");
+                        }
+                    });
+                    ratingValue.textContent = `Вы поставили: ${index + 1} / 10`;
+                });
+            });
+
+            coverUpload.addEventListener("change", function(event) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    coverImage.src = e.target.result;
+                    coverPreview.style.display = "block";
+                };
+                reader.readAsDataURL(event.target.files[0]);
+            });
+
+            closePreview.addEventListener("click", function() {
+                coverPreview.style.display = "none";
+                coverUpload.value = "";
+            });
+        });
+    </script>
 </body>
 </html>

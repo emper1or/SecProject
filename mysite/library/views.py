@@ -1,9 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-
 from .forms import BookForm, BookCoverForm
-from .models import Author
-
+from .models import Author, Book
 
 @login_required
 def add_author(request):
@@ -24,14 +22,15 @@ def add_book(request):
         cover_form = BookCoverForm(request.POST, request.FILES)
 
         if book_form.is_valid() and cover_form.is_valid():
-            # Сохраняем книгу, включая рейтинг
+            # Создаем объект книги, но пока не сохраняем
             book = book_form.save(commit=False)
             book.author = book_form.cleaned_data['author']
-            book.rating = book_form.cleaned_data['rating']  # Устанавливаем рейтинг из формы
+            book.rating = book_form.cleaned_data.get('rating', 0)  # Устанавливаем 0, если рейтинг не передан
             book.save()
 
-            # Добавляем текущего пользователя к книге
-            book.users.add(request.user)
+            # Добавляем текущего пользователя к книге (если в модели есть поле users)
+            if hasattr(book, 'users'):
+                book.users.add(request.user)
 
             # Сохраняем обложку, связывая с книгой
             cover = cover_form.save(commit=False)
