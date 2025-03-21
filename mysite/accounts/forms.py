@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
+import re
 
 User = get_user_model()
 
@@ -38,5 +39,57 @@ class VerificationForm(forms.Form):
     verification_code = forms.CharField(
         label="Код верификации",
         max_length=6,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        min_length=6,  # Код верификации должен быть фиксированной длины
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите шестизначный код'}),
+        help_text="Введите код из отправленного письма."
     )
+
+    def clean_verification_code(self):
+        code = self.cleaned_data.get("verification_code")
+        # Пример: проверка на цифры (код должен состоять только из чисел)
+        if not code.isdigit():
+            raise forms.ValidationError("Код должен содержать только числа.")
+        return code
+
+class ResetPasswordForm(forms.Form):
+    verification_code = forms.CharField(
+        label="Код подтверждения",
+        max_length=6,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Код из email'})
+    )
+    password = forms.CharField(
+        label="Новый пароль",
+        required=True,
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Новый пароль'})
+    )
+    confirm_password = forms.CharField(
+        label="Подтвердите новый пароль",
+        required=True,
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Повторите новый пароль'})
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        confirm_password = cleaned_data.get('confirm_password')
+
+        # Проверка на совпадение паролей
+        if password and confirm_password and password != confirm_password:
+            raise forms.ValidationError("Пароли не совпадают!")
+
+        # Проверка на соответствие требованиям
+        if password:
+            if len(password) < 8 or len(password) > 20:
+                raise forms.ValidationError("Пароль должен содержать от 8 до 20 символов.")
+            if not re.search(r"[A-Z]", password):
+                raise forms.ValidationError("Пароль должен содержать хотя бы одну заглавную букву.")
+            if not re.search(r"[a-z]", password):
+                raise forms.ValidationError("Пароль должен содержать хотя бы одну строчную букву.")
+            if not re.search(r"[0-9]", password):
+                raise forms.ValidationError("Пароль должен содержать хотя бы одну цифру.")
+            if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+                raise forms.ValidationError("Пароль должен содержать хотя бы один специальный символ.")
+
+        return cleaned_data

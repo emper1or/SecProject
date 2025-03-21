@@ -11,11 +11,17 @@
                 {% endfor %}
             {% endif %}
 
-            <form method="post">
+            <form method="POST" novalidate>
                 {% csrf_token %}
                 <div class="mb-3">
-                    <label class="form-label black-text">{{ form.label_tag }}</label>
-                    {{ form }}
+                    <label for="verification_code" class="form-label" style="color: black">Введите код верификации</label>
+                    {{ form.verification_code }}
+                    <!-- Показываем ошибку, если валидация не прошла -->
+                    {% if form.errors.verification_code %}
+                        <div class="text-danger small" style="color: black">
+                            {{ form.errors.verification_code|join:", " }}
+                        </div>
+                    {% endif %}
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Подтвердить</button>
             </form>

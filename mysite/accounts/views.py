@@ -2,10 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.core.exceptions import PermissionDenied
-from .forms import RegisterForm
 from .models import CustomUser
 from library.models import Book, BookCover
-from .forms import RegisterForm, VerificationForm
+from .forms import RegisterForm, VerificationForm, ResetPasswordForm
 from django.contrib import messages
 from django.core.mail import send_mail #Импортируем функцию для отправки почты
 from django.conf import settings
@@ -56,28 +55,33 @@ def login_view(request):
         return render(request, 'login.html')
 
 
+logger = logging.getLogger(__name__)
+
 def send_verification_email(email, verification_code):
     """
-    Отправляет письмо с кодом верификации на указанный email-адрес через SMTP Django.
+    Отправляет письмо с кодом верификации на указанную почту только в режиме продакшен.
     """
-    subject = 'Код верификации'
-    message = f'Ваш код верификации: {verification_code}'
-    from_email = settings.DEFAULT_FROM_EMAIL # Email отправителя из настроек
-    recipient_list = [email]
-    html_message = f'<p>Ваш код верификации: <strong>{verification_code}</strong></p>' # Html версия
-
+    if settings.DEBUG:
+        # Если Django работает в режиме разработки, просто логируем попытку отправки.
+        logger.debug(f'DEBUG mode: email НЕ отправляется. Код: {verification_code}, email: {email}')
+        return
     try:
+        subject = 'Код верификации'
+        message = f'Ваш код верификации: {verification_code}'
+        from_email = settings.DEFAULT_FROM_EMAIL  # Email отправителя из настроек
+        recipient_list = [email]
+        html_message = f'<p>Ваш код верификации: <strong>{verification_code}</strong></p>'
+
         logger.debug(f'Отправка email на {email}...')
         send_mail(
             subject,
             message,
             from_email,
             recipient_list,
-            fail_silently=False, # False вызывает исключение при ошибке отправки
-            html_message=html_message #Передаем html версию
+            fail_silently=False,  # Exception при ошибке
+            html_message=html_message
         )
         logger.info(f'Письмо успешно отправлено на {email}')
-
     except Exception as e:
         logger.error(f'Ошибка отправки письма на {email}: {e}')
 
@@ -135,3 +139,57 @@ def dashboard(request):
 
 def home(request):
     return render(request, 'home.html')
+
+def forgot_password(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        user = User.objects.filter(email=email).first()
+
+        if user:
+            verification_code = user.generate_verification_code()
+            user.verification_code = verification_code
+            user.save()
+            send_verification_email(email, verification_code)
+            request.session['user_id'] = user.id  # Сохраняем ID пользователя в сессии
+            messages.success(request, 'Код подтверждения отправлен на вашу почту.')
+            return redirect('reset_password')
+        else:
+            messages.error(request, 'Пользователь с таким email не найден.')
+            return render(request, 'forgot_password.html')
+
+    return render(request, 'forgot_password.html')
+
+from django.contrib.auth.hashers import make_password
+
+def reset_password(request):
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('login')
+
+    user = get_object_or_404(User, id=user_id)
+
+    if request.method == 'POST':
+        form = ResetPasswordForm(request.POST)
+
+        if form.is_valid():
+            code = form.cleaned_data['verification_code']
+            new_password = form.cleaned_data['password']
+
+            if user.verification_code == code:
+                user.set_password(new_password)
+                user.verification_code = None
+                user.save()
+                messages.success(request, 'Пароль успешно изменён! Теперь вы можете войти с новым паролем.')
+                return redirect('login')
+            else:
+                messages.error(request, 'Неверный код подтверждения.')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+
+    else:
+        form = ResetPasswordForm()
+
+    return render(request, 'reset_password.html', {'form': form})
+
+

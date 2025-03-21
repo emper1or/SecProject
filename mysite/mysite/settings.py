@@ -25,7 +25,9 @@ SECRET_KEY = 'django-insecure-p9=1r7!%ou$1s0k)=ktf+(f!8bl$yg(h=&$*98)7$&g)@$10mo
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+#Если вы хотите разрешить доступ с любого хоста (что не рекомендуется в продакшене), вы можете использовать:
+#ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -146,7 +148,7 @@ LOGGING = {
     'loggers': {
         'accounts.views': {  # Замени 'your_app_name.views' на путь к твоему модулю с views.py
             'handlers': ['console'],
-            'level': 'ERROR',  # Или 'INFO' для более подробных логов
+            'level': 'DEBUG',  # Или 'ERROR' 'INFO' для более подробных логов
         },
     },
 }

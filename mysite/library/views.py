@@ -24,9 +24,10 @@ def add_book(request):
         cover_form = BookCoverForm(request.POST, request.FILES)
 
         if book_form.is_valid() and cover_form.is_valid():
-            # Сохраняем книгу, связывая с автором
+            # Сохраняем книгу, включая рейтинг
             book = book_form.save(commit=False)
             book.author = book_form.cleaned_data['author']
+            book.rating = book_form.cleaned_data['rating']  # Устанавливаем рейтинг из формы
             book.save()
 
             # Добавляем текущего пользователя к книге

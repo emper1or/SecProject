@@ -14,9 +14,10 @@ class Book(models.Model):
     description = models.TextField(verbose_name="Описание книги", blank=True, null=True)
     author = models.ForeignKey(Author, on_delete=models.CASCADE, verbose_name="Автор")
     users = models.ManyToManyField(CustomUser, related_name='books')
+    rating = models.IntegerField(verbose_name="Рейтинг книги", default=0, blank=True)
 
     def __str__(self):
-        return self.title
+        return f"{self.title} (Рейтинг: {self.rating}/10)"
 
 
 class BookCover(models.Model):
