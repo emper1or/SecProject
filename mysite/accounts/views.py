@@ -1,21 +1,21 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.decorators import login_required,user_passes_test
-from django.core.exceptions import PermissionDenied
-from .models import CustomUser
-from library.models import Book, BookCover
-from .forms import RegisterForm, VerificationForm, ResetPasswordForm
-from django.contrib import messages
-from django.core.mail import send_mail #Импортируем функцию для отправки почты
-from django.conf import settings
-from django.contrib.auth import get_user_model
-import requests
 import logging
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.mail import send_mail
+from django.shortcuts import render, redirect, get_object_or_404
+from library.models import Book, BookCover
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.hashers import make_password
 
 
+from .forms import RegisterForm, VerificationForm, ResetPasswordForm, UserEditForm, PasswordChangeForm
 
 User = get_user_model()
-logger = logging.getLogger(__name__) # Получаем логгер
+logger = logging.getLogger(__name__)  # Получаем логгер
+
 
 def anonymous_required(user):
     return not user.is_authenticated
@@ -34,6 +34,7 @@ def register(request):
     else:
         form = RegisterForm()
         return render(request, 'register.html', {'form': form})
+
 
 @user_passes_test(anonymous_required, login_url='home')
 def login_view(request):
@@ -56,6 +57,7 @@ def login_view(request):
 
 
 logger = logging.getLogger(__name__)
+
 
 def send_verification_email(email, verification_code):
     """
@@ -108,8 +110,9 @@ def verify(request):
                 user.save()
                 remaining_attempts = 3 - user.verification_attempts
                 if user.verification_attempts >= 3:
-                    messages.error(request, 'Превышено количество попыток верификации. Пожалуйста, повторите попытку позже.') #Можете перенаправить на страницу сброса пароля
-                    return redirect('login') #Перенаправляем на страницу входа
+                    messages.error(request,
+                                   'Превышено количество попыток верификации. Пожалуйста, повторите попытку позже.')  #Можете перенаправить на страницу сброса пароля
+                    return redirect('login')  #Перенаправляем на страницу входа
                 else:
                     messages.error(request, f'Неверный код. Осталось попыток: {remaining_attempts}')
                     return render(request, 'verify.html', {'form': form, 'remaining_attempts': remaining_attempts})
@@ -117,6 +120,7 @@ def verify(request):
     else:
         form = VerificationForm()
         return render(request, 'verify.html', {'form': form, 'remaining_attempts': 3 - user.verification_attempts})
+
 
 def logout_view(request):
     logout(request)
@@ -139,6 +143,7 @@ def dashboard(request):
 
 def home(request):
     return render(request, 'home.html')
+
 
 def forgot_password(request):
     if request.method == 'POST':
@@ -193,3 +198,39 @@ def reset_password(request):
     return render(request, 'reset_password.html', {'form': form})
 
 
+@login_required
+def profile(request):
+    return render(request, 'profile.html')
+
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = UserEditForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Профиль успешно обновлен.')
+            return redirect('profile')
+    else:
+        form = UserEditForm(instance=request.user)
+    return render(request, 'edit_profile.html', {'form': form})
+
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.POST)
+        if form.is_valid():
+            old_password = form.cleaned_data['old_password']
+            new_password = form.cleaned_data['new_password1']
+            if request.user.check_password(old_password):
+                request.user.set_password(new_password)
+                request.user.save()
+                update_session_auth_hash(request, request.user)  # Обновление сессии, чтобы пользователь не вышел
+                messages.success(request, 'Пароль успешно изменен.')
+                return redirect('profile')
+            else:
+                messages.error(request, 'Старый пароль введен неверно.')
+    else:
+        form = PasswordChangeForm()
+    return render(request, 'change_password.html', {'form': form})
