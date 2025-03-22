@@ -4,11 +4,6 @@
 {% block content %}
 <div class="book-detail-container">
     <link rel="stylesheet" href="{% static 'css/library/book_detail_style.css' %}">
-    <!-- Хлебные крошки -->
-    <nav class="breadcrumb">
-        <a href="{% url 'dashboard' %}">Главная</a> &gt;
-        <span>{{ book.title }}</span>
-    </nav>
 
     <h2>{{ book.title }}</h2>
     <div class="book-info">
