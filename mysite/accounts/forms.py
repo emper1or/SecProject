@@ -93,3 +93,24 @@ class ResetPasswordForm(forms.Form):
                 raise forms.ValidationError("Пароль должен содержать хотя бы один специальный символ.")
 
         return cleaned_data
+
+
+class PasswordChangeForm(forms.Form):
+    old_password = forms.CharField(widget=forms.PasswordInput, label="Старый пароль")
+    new_password1 = forms.CharField(widget=forms.PasswordInput, label="Новый пароль")
+    new_password2 = forms.CharField(widget=forms.PasswordInput, label="Подтвердите новый пароль")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password1 = cleaned_data.get("new_password1")
+        new_password2 = cleaned_data.get("new_password2")
+
+        if new_password1 and new_password2 and new_password1 != new_password2:
+            raise forms.ValidationError("Новые пароли не совпадают.")
+        return cleaned_data
+
+
+class UserEditForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name']
