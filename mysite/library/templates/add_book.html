@@ -73,6 +73,7 @@
                     {% endfor %}
                     <span id="rating-value"></span>
                 </div>
+                <input type="hidden" name="rating" id="rating-input" value="0">
             </fieldset>
 
             <fieldset class="mb-4">
@@ -101,52 +102,35 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            let stars = document.querySelectorAll(".star");
-            let ratingValue = document.getElementById("rating-value");
-            let ratingContainer = document.getElementById("rating-container");
-            let coverUpload = document.getElementById("cover-upload");
-            let coverPreview = document.getElementById("cover-preview");
-            let coverImage = document.getElementById("cover-image");
-            let closePreview = document.getElementById("close-preview");
+       document.addEventListener("DOMContentLoaded", function() {
+    let stars = document.querySelectorAll(".star");
+    let ratingValue = document.getElementById("rating-value");
+    let ratingInput = document.getElementById("rating-input");
 
-            stars.forEach((star, index) => {
-                star.addEventListener("mouseover", function() {
-                    stars.forEach((s, i) => {
-                        s.classList.toggle("hovered", i <= index);
-                    });
-                    ratingValue.textContent = `${index + 1} / 10`;
-                });
-
-                star.addEventListener("mouseout", function() {
-                    stars.forEach(s => s.classList.remove("hovered"));
-                });
-
-                star.addEventListener("click", function() {
-                    stars.forEach((s, i) => {
-                        s.classList.remove("selected");
-                        if (i <= index) {
-                            s.classList.add("selected");
-                        }
-                    });
-                    ratingValue.textContent = `Вы поставили: ${index + 1} / 10`;
-                });
+    stars.forEach((star, index) => {
+        star.addEventListener("mouseover", function() {
+            stars.forEach((s, i) => {
+                s.classList.toggle("hovered", i <= index);
             });
-
-            coverUpload.addEventListener("change", function(event) {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    coverImage.src = e.target.result;
-                    coverPreview.style.display = "block";
-                };
-                reader.readAsDataURL(event.target.files[0]);
-            });
-
-            closePreview.addEventListener("click", function() {
-                coverPreview.style.display = "none";
-                coverUpload.value = "";
-            });
+            ratingValue.textContent = `${index + 1} / 10`;
         });
+
+        star.addEventListener("mouseout", function() {
+            stars.forEach(s => s.classList.remove("hovered"));
+        });
+
+        star.addEventListener("click", function() {
+            stars.forEach((s, i) => {
+                s.classList.remove("selected");
+                if (i <= index) {
+                    s.classList.add("selected");
+                }
+            });
+            ratingValue.textContent = `Вы поставили: ${index + 1} / 10`;
+            ratingInput.value = index + 1;  // Обновляем значение скрытого поля
+        });
+    });
+});
     </script>
 </body>
 </html>
