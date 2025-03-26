@@ -47,7 +47,7 @@
             <fieldset class="mb-4">
                 <legend class="fs-4">Информация о книге</legend>
                 {% for field in book_form %}
-                    {% if field.name != "rating" %}  <!-- Убираем старое поле рейтинга -->
+                    {% if field.name != "rating" %}
                         <div class="mb-3 form-group">
                             <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
                             {{ field }}
