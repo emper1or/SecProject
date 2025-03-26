@@ -61,11 +61,11 @@
   --bs-body-font-size: 1rem;
   --bs-body-font-weight: 400;
   --bs-body-line-height: 1.5;
-  --bs-body-color: #ff6a00;
-  --bs-body-bg: #fff;
+  --bs-body-color: #87CEEB;
+  --bs-body-bg: #B0E0E6;
   --bs-border-width: 1px;
   --bs-border-style: solid;
-  --bs-border-color: #ff6a00;
+  --bs-border-color: #87CEEB;
   --bs-border-color-translucent: rgba(0, 0, 0, 0.175);
   --bs-border-radius: 0.375rem;
   --bs-border-radius-sm: 0.25rem;
@@ -99,7 +99,7 @@ body {
   line-height: var(--bs-body-line-height);
   color: var(--bs-body-color);
   text-align: var(--bs-body-text-align);
-  background: linear-gradient(135deg, #87CEFA, #4682B4);
+  background: linear-gradient(135deg, #B0E0E6, #87CEEB);
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }

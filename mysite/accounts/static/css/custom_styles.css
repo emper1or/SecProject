@@ -1,39 +1,37 @@
 body {
-    background: linear-gradient(135deg, #ee0979, #ff6a00);
-    color: #fff;
+    background: #ffffff !important; /* Белый фон */
+    color: #003366; /* Цвет шрифта */
     font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Выравнивание по верхнему краю */
-    height: 200vh;
+    align-items: flex-start;
+    min-height: 100vh;
     margin: 0;
-    overflow-x: hidden; /* Убираем горизонтальную прокрутку */
+    overflow-x: hidden;
     overflow-y: auto;
 }
 
 .container {
-    background: rgba(255, 255, 255, 0.1);
+    background: #ffffff !important; /* Белый фон */
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 800px;
-    margin: 0 auto;
-    overflow: hidden; /* Убираем выход за края */
+    margin: 20px auto;
+    overflow: hidden;
+    position: relative;
 }
 
 input[type="text"], textarea, select {
-    border: 1px solid #ccc;
-    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid #004080;
+    background: #ffffff; /* Белый фон */
     border-radius: 15px;
     padding: 10px;
     width: 100%;
-    color: #333;
+    color: #003366;
     font-size: 16px;
     resize: none;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
 }
 
 select:focus {
@@ -42,87 +40,18 @@ select:focus {
 }
 
 select option {
-    background: rgba(255, 255, 255, 0.9);
-    color: #333;
+    background: #ffffff;
+    color: #003366;
 }
 
 select option:disabled {
-    color: #aaa;
-}
-
-/* Центрируем элементы внутри контейнера */
-.form-group {
-    display: flex;
-    flex-direction: column;
-    margin-right: auto;
-    margin-left: auto;
-    max-width: 80%; /* Ограничиваем максимальную ширину */
-}
-
-/* Стили для био и описания */
-.bio-textarea {
-    min-height: 150px;
-    background: rgba(255, 255, 255, 0.6) !important;
-    border: 2px solid #bbb !important;
-    border-radius: 20px !important;
-}
-
-.description-textarea {
-    min-height: 150px;
-    background: rgba(255, 255, 255, 0.4) !important;
-    border: 2px solid #aaa !important;
-    border-radius: 20px !important;
-}
-
-.file-upload-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border: 2px solid #bbb;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.5);
-    cursor: pointer;
-    transition: background 0.3s;
-    overflow: hidden;
-    position: relative;
-}
-
-.file-upload-container:hover {
-    background: rgba(255, 255, 255, 0.7);
-}
-
-.file-upload-container img {
-    width: 20px;
-    height: 20px;
-    filter: brightness(0) invert(1);
-    pointer-events: none;
-}
-
-.file-upload-container input {
-    opacity: 0;
-    width: 40px;
-    height: 40px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    cursor: pointer;
-}
-
-button[type="submit"], .btn-secondary {
-    padding: 10px 20px;
-    border-radius: 10px;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background 0.3s;
-    display: inline-block;
+    color: #666;
 }
 
 button[type="submit"] {
     background-color: #ff6a00;
     border: none;
+    color: white;
 }
 
 button[type="submit"]:hover {
@@ -132,6 +61,7 @@ button[type="submit"]:hover {
 .btn-secondary {
     background-color: #ee0979;
     border: none;
+    color: white;
 }
 
 .btn-secondary:hover {
@@ -141,6 +71,7 @@ button[type="submit"]:hover {
 .rating {
     display: flex;
     align-items: center;
+    color: #003366;
 }
 
 .star {
@@ -150,45 +81,17 @@ button[type="submit"]:hover {
     transition: color 0.3s;
 }
 
-.rating:hover .star {
-    color: #ccc;
-}
-
 .star:hover,
-.star:hover ~ .star,
+.star.hovered,
 .star.selected,
 .star.selected ~ .star {
-    color: gold;
-}
-
-.rating:not(:hover) .star:not(.selected) {
-    color: #ccc;
-}
-
-.rating .star:hover ~ .star {
-    color: #ccc;
-}
-
-.rating .star:hover {
     color: gold;
 }
 
 #rating-value {
     margin-left: 15px;
     font-size: 20px;
-}
-
-#cover-preview {
-    position: relative;
-    display: inline-block;
-}
-
-#cover-preview img {
-    margin-top: 10px;
-    border-radius: 10px;
-    width: 300px;
-    height: auto;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    color: #003366;
 }
 
 #close-preview {
@@ -199,58 +102,74 @@ button[type="submit"]:hover {
     color: white;
     border: none;
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    font-size: 14px;
+    width: 25px;
+    height: 25px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    display: none;
+    z-index: 10;
 }
 
 #close-preview:hover {
     background: darkred;
 }
 
-/* Flexbox настройки для центровки элементов */
-.row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-}
-
-.col-md-8 {
-    flex: 1;
-}
-
-.col-md-4 {
-    flex: 0 0 30%;
-}
-
-/* Кнопка для возврата на главную */
-.back-button {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    background-color: #ff6a00;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 10px;
-    text-decoration: none;
-    font-size: 16px;
-    font-weight: bold;
+.file-upload-container {
     display: flex;
     align-items: center;
-    transition: background-color 0.3s ease;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border: 2px solid #004080;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    position: relative;
 }
 
-.back-button:hover {
-    background-color: #e65c00;
+.file-upload-container:hover {
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
 }
 
-.back-button:focus {
-    outline: none;
+.file-upload-container img {
+    width: 24px;
+    height: 24px;
+    filter: brightness(0) invert(1);
+    pointer-events: none;
 }
 
-.back-button svg {
-    margin-right: 8px;
+.file-upload-container input {
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+}
+
+.preview-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 300px;
+    height: 300px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.preview-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.preview-container:hover img {
+    transform: scale(1.05);
 }
