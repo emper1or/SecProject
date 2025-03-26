@@ -28,8 +28,14 @@ def register(request):
             user = form.save()
             messages.success(request, 'Регистрация прошла успешно! Теперь войдите.')
             logger.info(f'Новый пользователь зарегистрирован: {user.username}')  # Логируем информацию о регистрации
-            return redirect('login')
+            user.verification_code = user.generate_verification_code()
+            user.verification_attempts = 0  # Reset attempts on new login
+            user.save()
+            send_verification_email(user.email, user.verification_code)
+            request.session['user_id'] = user.id  # Store user ID in session
+            return redirect('verify')
         else:
+
             return render(request, 'register.html', {'form': form})
     else:
         form = RegisterForm()
@@ -51,7 +57,7 @@ def login_view(request):
             request.session['user_id'] = user.id  # Store user ID in session
             return redirect('verify')  # Redirect to verification page
         else:
-            return render(request, 'login.html', {'error': 'Неверное имя пользователя или пароль'})
+            return render(request, 'login.html', {'error': 'Неверное имя пользователя или пароль', 'username_value': username})
     else:
         return render(request, 'login.html')
 
