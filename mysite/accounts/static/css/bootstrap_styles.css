@@ -10,15 +10,7 @@
  * Copyright 2011-2022 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
- .center-box {
-    background-color: #00A1DB; /* Светло-голубой цвет */
-    width: 60%; /* Ширина блока */
-    margin: auto; /* Центрирование */
-    padding: 50px; /* Внутренние отступы */
-    text-align: center; /* Выравнивание текста */
-    border-radius: 10px; /* Закругленные углы */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Легкая тень */
-}
+
 :root {
   --bs-blue: #0d6efd;
   --bs-indigo: #6610f2;
@@ -10919,8 +10911,8 @@ header.masthead .bg-circle-4 {
 
 @media (min-width: 992px) {
   header.masthead {
-    padding-top: calc(10rem + 55px);
-    padding-bottom: 10rem;
+    padding-top: calc(15rem + 55px);
+    padding-bottom: 22rem;
   }
   header.masthead .masthead-content .masthead-heading {
     font-size: 6rem;

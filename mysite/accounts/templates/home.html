@@ -1,9 +1,9 @@
 {% extends 'index.html' %}
 
 {% block content %}
-<div class="center-box">
+<div class="display-5 text-center">
     <h1 class="display-4 text-center">Добро пожаловать в библиотеку!</h1>
-    <div class="center-box">
+    <div class="display-4 text-center">
         {% if user.is_authenticated %}
             <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">Перейти в личный кабинет</a>
         {% else %}

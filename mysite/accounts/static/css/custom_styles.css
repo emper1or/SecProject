@@ -1,6 +1,6 @@
 body {
-    background: #ffffff !important; /* Белый фон */
-    color: #003366; /* Цвет шрифта */
+    background: #ffffff !important;
+    color: #003366;
     font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
@@ -12,7 +12,7 @@ body {
 }
 
 .container {
-    background: #ffffff !important; /* Белый фон */
+    background: #E6F7FF !important; /* Светло-светло-голубой фон */
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -21,11 +21,12 @@ body {
     margin: 20px auto;
     overflow: hidden;
     position: relative;
+    border: 1px solid #00A1DB; /* Сохраняем текущую обводку */
 }
 
 input[type="text"], textarea, select {
-    border: 1px solid #004080;
-    background: #ffffff; /* Белый фон */
+    border: 1px solid #00A1DB;
+    background: #FFFFFF; /* Светло-светло-голубой фон */
     border-radius: 15px;
     padding: 10px;
     width: 100%;
@@ -36,7 +37,8 @@ input[type="text"], textarea, select {
 
 select:focus {
     outline: none;
-    border-color: #ff6a00;
+    border-color: #00A1DB;
+    box-shadow: 0 0 0 2px rgba(0, 161, 219, 0.2);
 }
 
 select option {
@@ -49,23 +51,26 @@ select option:disabled {
 }
 
 button[type="submit"] {
-    background-color: #ff6a00;
+    background-color: #00A1DB;
     border: none;
     color: white;
+    transition: background-color 0.3s;
 }
 
 button[type="submit"]:hover {
-    background-color: #e65c00;
+    background-color: #0088B9;
 }
 
 .btn-secondary {
-    background-color: #ee0979;
+    background-color: #00A1DB;
     border: none;
     color: white;
+    opacity: 0.8;
 }
 
 .btn-secondary:hover {
-    background-color: #d1066d;
+    background-color: #0088B9;
+    opacity: 1;
 }
 
 .rating {
@@ -85,7 +90,7 @@ button[type="submit"]:hover {
 .star.hovered,
 .star.selected,
 .star.selected ~ .star {
-    color: gold;
+    color: #00A1DB;
 }
 
 #rating-value {
@@ -98,7 +103,7 @@ button[type="submit"]:hover {
     position: absolute;
     top: 5px;
     right: 5px;
-    background: red;
+    background: #00A1DB;
     color: white;
     border: none;
     border-radius: 50%;
@@ -111,9 +116,10 @@ button[type="submit"]:hover {
 }
 
 #close-preview:hover {
-    background: darkred;
+    background: #0088B9;
 }
 
+/* Восстановленная оригинальная кнопка загрузки файла */
 .file-upload-container {
     display: flex;
     align-items: center;
@@ -122,7 +128,7 @@ button[type="submit"]:hover {
     height: 50px;
     border: 2px solid #004080;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.3);
+    background: #0088B9;
     cursor: pointer;
     transition: background 0.3s, transform 0.2s;
     position: relative;
@@ -159,6 +165,7 @@ button[type="submit"]:hover {
     background-color: #ffffff;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #00A1DB;
     position: relative;
     overflow: hidden;
 }
