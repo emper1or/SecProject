@@ -1,9 +1,9 @@
 {% extends 'index.html' %}
 
 {% block content %}
-<div class="container d-flex justify-content-center align-items-center vh-100">
-    <div class="card shadow-lg p-4" style="max-width: 400px; width: 100%;">
-        <h2 class="text-center text-primary">Регистрация</h2>
+    <div class="container d-flex justify-content-center align-items-center vh-0">
+        <div class="card shadow-lg p-4" style="width: 450px;">
+            <h2 class="text-center text-primary">Регистрация</h2>
 
         <!-- Сообщения об ошибках -->
         {% if form.errors %}
@@ -42,14 +42,11 @@
                 </div>
             {% endfor %}
 
-            <!-- Кнопка отправки формы -->
-            <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
-        </form>
-
-        <!-- Ссылка на вход -->
-        <div class="text-center mt-3">
-            <p style="color: #000000;">Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></p>
+                <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+            </form>
+            <div class="text-center mt-3">
+                <p>Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></p>
+            </div>
         </div>
     </div>
-</div>
 {% endblock %}

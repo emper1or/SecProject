@@ -21,27 +21,34 @@
     <body id="page-top">
         <!-- Navigation-->
         <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
-            <div class="container px-5">
-                <a class="navbar-brand" href="{% url 'home' %}">Главная страница</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-                {% if user.is_authenticated %}
-                <div class="collapse navbar-collapse" id="navbarResponsive">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">{{user.username}}</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Профиль</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Выйти</a></li>
-                    </ul>
-                </div>
-                {% else %}
-                <div class="collapse navbar-collapse" id="navbarResponsive">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Зарегистрироваться</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Войти</a></li>
-                    </ul>
-                </div>
-                {% endif %}
-            </div>
-        </nav>
+    <div class="container px-5">
+        <!-- Картинка в качестве кнопки -->
+        <a href="{% url 'home' %}">
+            <img src="https://psv4.userapi.com/s/v1/d/BI1Ho4XuBFeyxly_qucMuPUYgxYHmeiDgFa0cpPdMa3ImESTiKGO6s0V_eUeXQLyUsXE8Mp0DjUlPdqqblfiRO9IZWIh-Wn0SSB6fhMbNLp6-v7Pq-vNbg/d347513c-957f-4379-af05-36c05d271175-Photoroom.png" alt="Главная страница" style="max-width: 170px; height: auto;">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        {% if user.is_authenticated %}
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">{{user.username}}</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Профиль</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Выйти</a></li>
+            </ul>
+        </div>
+        {% else %}
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Зарегистрироваться</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Войти</a></li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</nav>
+
+
         <!-- Header-->
         <header class="masthead text-center text-white">
                  {% if messages %}
