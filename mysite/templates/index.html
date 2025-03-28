@@ -44,7 +44,11 @@
         </nav>
         <!-- Header-->
         <header class="masthead text-center text-white">
-            <div class="masthead-content">
+                 {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}" role="alert" style="color: black">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
                 <main>
                 {% block content %}
                 {% endblock %}
