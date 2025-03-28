@@ -21,20 +21,22 @@ def add_book(request):
     authors = Author.objects.all()
 
     initial_data = request.session.get('book_form_data', {})
-    print(initial_data)
 
     if request.method == 'POST':
         if 'add_author' in request.POST:
             # Сохраняем введённые данные в сессию перед переходом
             request.session['book_form_data'] = request.POST.dict()
+            print(request.POST.dict())
             print(request.session['book_form_data'])
             return redirect('add_author')
 
         book_form = BookForm(request.POST)
         cover_form = BookCoverForm(request.POST, request.FILES)
 
+
         if book_form.is_valid() and cover_form.is_valid():
             # Создаем объект книги, но пока не сохраняем
+            print(book_form)
             book = book_form.save(commit=False)
             book.author = book_form.cleaned_data['author']
             book.rating = book_form.cleaned_data.get('rating', 0)  # Устанавливаем 0, если рейтинг не передан
@@ -53,12 +55,15 @@ def add_book(request):
             return redirect('success')  # Перенаправление на страницу успеха
     else:
         book_form = BookForm(initial=initial_data)
+        if initial_data.get('rating'):
+            book_form.fields['rating'].initial = int(initial_data['rating'])
         cover_form = BookCoverForm()
 
     return render(request, 'add_book.html', {
         'book_form': book_form,
         'cover_form': cover_form,
         'authors': authors,
+        'saved_rating': initial_data.get('rating', 0)
     })
 
 
