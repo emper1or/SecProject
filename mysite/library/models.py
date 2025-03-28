@@ -22,8 +22,7 @@ class Book(models.Model):
 
 class BookCover(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE, verbose_name="Книга")
-    cover = models.ImageField(upload_to='covers/', verbose_name="Обложка книги")
-
+    cover = models.ImageField(upload_to='covers/', blank=True, null=True, verbose_name="Обложка книги")
     def __str__(self):
         return f"Обложка для {self.book.title}"
 
