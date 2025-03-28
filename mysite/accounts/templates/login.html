@@ -1,7 +1,10 @@
 {% extends 'index.html' %}
+{% load static %}
 
 {% block content %}
+
 <div class="container d-flex justify-content-center align-items-center vh-0">
+    <link href="{% static 'css/accounts/login_style.css' %}" rel="stylesheet" />
 
     <div class="card shadow-lg p-4" style="width: 400px;">
         <h2 class="text-center text-primary">Вход</h2>
