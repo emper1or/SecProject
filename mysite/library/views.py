@@ -1,9 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 
 from .forms import BookForm, BookCoverForm
 from .models import Author, Book, BookCover
-
 
 @login_required
 def add_author(request):
@@ -12,6 +12,7 @@ def add_author(request):
         bio = request.POST.get('bio')
         if name:  # Проверяем, что имя автора указано
             Author.objects.create(name=name, bio=bio)
+            messages.success(request, 'Автор успешно добавлен!')
             return redirect('add_book')  # Перенаправляем на страницу добавления книги
     return render(request, 'add_author.html')
 
@@ -19,7 +20,16 @@ def add_author(request):
 def add_book(request):
     authors = Author.objects.all()
 
+    initial_data = request.session.get('book_form_data', {})
+    print(initial_data)
+
     if request.method == 'POST':
+        if 'add_author' in request.POST:
+            # Сохраняем введённые данные в сессию перед переходом
+            request.session['book_form_data'] = request.POST.dict()
+            print(request.session['book_form_data'])
+            return redirect('add_author')
+
         book_form = BookForm(request.POST)
         cover_form = BookCoverForm(request.POST, request.FILES)
 
@@ -38,10 +48,11 @@ def add_book(request):
             cover = cover_form.save(commit=False)
             cover.book = book
             cover.save()
-
+            request.session.pop('book_form_data', None)
+            messages.success(request, 'Книга успешно добавлена!')
             return redirect('success')  # Перенаправление на страницу успеха
     else:
-        book_form = BookForm()
+        book_form = BookForm(initial=initial_data)
         cover_form = BookCoverForm()
 
     return render(request, 'add_book.html', {

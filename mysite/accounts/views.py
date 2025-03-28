@@ -1,17 +1,15 @@
 import logging
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.mail import send_mail
+from django.core.mail import send_mail  # Импортируем функцию для отправки почты
 from django.shortcuts import render, redirect, get_object_or_404
 from library.models import Book, BookCover
-from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth.hashers import make_password
 
-
-from .forms import RegisterForm, VerificationForm, ResetPasswordForm, UserEditForm, PasswordChangeForm
+from .forms import RegisterForm, VerificationForm, ResetPasswordForm, PasswordChangeForm
 
 User = get_user_model()
 logger = logging.getLogger(__name__)  # Получаем логгер
@@ -26,7 +24,7 @@ def register(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            messages.success(request, 'Регистрация прошла успешно! Теперь войдите.')
+            messages.success(request, 'На вашу электронную почту отправлен код подтверждения регистрации.')
             logger.info(f'Новый пользователь зарегистрирован: {user.username}')  # Логируем информацию о регистрации
             user.verification_code = user.generate_verification_code()
             user.verification_attempts = 0  # Reset attempts on new login
@@ -62,34 +60,28 @@ def login_view(request):
         return render(request, 'login.html')
 
 
-logger = logging.getLogger(__name__)
-
-
 def send_verification_email(email, verification_code):
     """
-    Отправляет письмо с кодом верификации на указанную почту только в режиме продакшен.
+    Отправляет письмо с кодом верификации на указанный email-адрес через SMTP Django.
     """
-    if settings.DEBUG:
-        # Если Django работает в режиме разработки, просто логируем попытку отправки.
-        logger.debug(f'DEBUG mode: email НЕ отправляется. Код: {verification_code}, email: {email}')
-        return
-    try:
-        subject = 'Код верификации'
-        message = f'Ваш код верификации: {verification_code}'
-        from_email = settings.DEFAULT_FROM_EMAIL  # Email отправителя из настроек
-        recipient_list = [email]
-        html_message = f'<p>Ваш код верификации: <strong>{verification_code}</strong></p>'
+    subject = 'Код верификации'
+    message = f'Ваш код верификации: {verification_code}'
+    from_email = settings.DEFAULT_FROM_EMAIL  # Email отправителя из настроек
+    recipient_list = [email]
+    html_message = f'<p>Ваш код верификации: <strong>{verification_code}</strong></p>'  # Html версия
 
+    try:
         logger.debug(f'Отправка email на {email}...')
         send_mail(
             subject,
             message,
             from_email,
             recipient_list,
-            fail_silently=False,  # Exception при ошибке
-            html_message=html_message
+            fail_silently=False,  # False вызывает исключение при ошибке отправки
+            html_message=html_message  #Передаем html версию
         )
         logger.info(f'Письмо успешно отправлено на {email}')
+
     except Exception as e:
         logger.error(f'Ошибка отправки письма на {email}: {e}')
 
