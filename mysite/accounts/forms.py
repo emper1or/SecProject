@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 import re
 
 User = get_user_model()
@@ -96,9 +97,25 @@ class ResetPasswordForm(forms.Form):
 
 
 class PasswordChangeForm(forms.Form):
-    old_password = forms.CharField(widget=forms.PasswordInput, label="Старый пароль")
-    new_password1 = forms.CharField(widget=forms.PasswordInput, label="Новый пароль")
-    new_password2 = forms.CharField(widget=forms.PasswordInput, label="Подтвердите новый пароль")
+    old_password = forms.CharField(
+        widget=forms.PasswordInput,
+        label="Старый пароль",
+        help_text="Введите ваш текущий пароль для подтверждения."
+    )
+    new_password1 = forms.CharField(
+        widget=forms.PasswordInput,
+        label="Новый пароль",
+        validators=[validate_password],
+        help_text="Пароль должен быть не менее 8 символов и содержать буквы и цифры."
+    )
+    new_password2 = forms.CharField(
+        widget=forms.PasswordInput,
+        label="Подтвердите новый пароль",
+        help_text="Введите новый пароль ещё раз для проверки."
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def clean(self):
         cleaned_data = super().clean()

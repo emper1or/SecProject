@@ -2,65 +2,90 @@
 {% load static %}
 
 {% block content %}
-<div class="edit-book-container">
-    <link rel="stylesheet" href="{% static 'css/library/edit_book_style.css' %}">
-    <h2>Редактировать книгу: {{ book.title }}</h2>
+<link rel="stylesheet" href="{% static 'css/library/edit_book_style.css' %}">
 
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
+<div class="container mt-5">
+    <div class="card shadow-lg p-4 mb-5 bg-white rounded" style="max-width: 600px; margin: auto;">
+        <h2 class="text-center text-primary mb-4">Редактировать книгу: {{ book.title }}</h2>
 
-        <!-- Форма для книги -->
-        <div class="form-group">
-            <label for="{{ book_form.title.id_for_label }}">Название книги:</label>
-            {{ book_form.title }}
-            {% if book_form.title.errors %}
-            <div class="error-message">{{ book_form.title.errors }}</div>
-            {% endif %}
-        </div>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
 
-        <div class="form-group">
-            <label for="{{ book_form.title.id_for_label }}">Рейтинг</label>
-            {{ book_form.rating }}
-            {% if book_form.title.errors %}
-            <div class="error-message">{{ book_form.title.errors }}</div>
-            {% endif %}
-        </div>
+            <!-- Название книги -->
+            <div class="mb-3">
+                <label for="{{ book_form.title.id_for_label }}" class="form-label">Название книги:</label>
+                <input type="text" class="form-control rounded-pill border-primary shadow-sm"
+                       id="{{ book_form.title.id_for_label }}" name="{{ book_form.title.name }}"
+                       value="{{ book_form.title.value }}">
+                {% if book_form.title.errors %}
+                    <div class="text-danger small">{{ book_form.title.errors }}</div>
+                {% endif %}
+            </div>
 
-        <div class="form-group">
-            <label for="{{ book_form.description.id_for_label }}">Описание:</label>
-            {{ book_form.description }}
-            {% if book_form.description.errors %}
-            <div class="error-message">{{ book_form.description.errors }}</div>
-            {% endif %}
-        </div>
+            <!-- Рейтинг -->
+            <div class="mb-3">
+                <label for="{{ book_form.rating.id_for_label }}" class="form-label">Рейтинг:</label>
+                <input type="number" class="form-control rounded-pill border-primary shadow-sm"
+                       id="{{ book_form.rating.id_for_label }}" name="{{ book_form.rating.name }}"
+                       value="{{ book_form.rating.value }}" step="1" min="0" max="10">
+                {% if book_form.rating.errors %}
+                    <div class="text-danger small">{{ book_form.rating.errors }}</div>
+                {% endif %}
+            </div>
 
-        <div class="form-group">
-            <label for="{{ book_form.author.id_for_label }}">Автор:</label>
-            {{ book_form.author }}
-            {% if book_form.author.errors %}
-            <div class="error-message">{{ book_form.author.errors }}</div>
-            {% endif %}
-        </div>
+            <!-- Описание -->
+            <div class="mb-3">
+                <label for="{{ book_form.description.id_for_label }}" class="form-label">Описание:</label>
+                <textarea class="form-control rounded border-primary shadow-sm"
+                          id="{{ book_form.description.id_for_label }}" name="{{ book_form.description.name }}"
+                          rows="4">{{ book_form.description.value }}</textarea>
+                {% if book_form.description.errors %}
+                    <div class="text-danger small">{{ book_form.description.errors }}</div>
+                {% endif %}
+            </div>
 
-        <!-- Форма для обложки -->
-        <div class="form-group">
-            <label for="{{ cover_form.cover.id_for_label }}">Обложка:</label>
-            {% if book.bookcover_set.first %}
-                <img src="{{ book.bookcover_set.first.cover.url }}" class="cover-image"  alt="Текущая обложка" />
-            {% else %}
-                <p>Обложка отсутствует.</p>
-            {% endif %}
-            <input type="file" name="{{ cover_form.cover.name }}" id="{{ cover_form.cover.id_for_label }}">
-            {% if cover_form.cover.errors %}
-            <div class="error-message">{{ cover_form.cover.errors }}</div>
-            {% endif %}
-        </div>
+                            <!-- Автор -->
+                            <div class="mb-3">
+                    <label for="{{ book_form.author.id_for_label }}" class="form-label">Автор:</label>
+                    <select name="{{ book_form.author.name }}" id="{{ book_form.author.id_for_label }}"
+                            class="form-select rounded-pill border-primary shadow-sm">
+                        {% for author in book_form.author.field.queryset %}
+                            <option value="{{ author.id }}" {% if author.id == book_form.author.value %}selected{% endif %}>
+                                {{ author.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if book_form.author.errors %}
+                        <div class="text-danger small">{{ book_form.author.errors }}</div>
+                    {% endif %}
+                </div>
 
-        <!-- Кнопки -->
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
-            <a href="{% url 'book_detail' book.id %}" class="btn btn-secondary">Отмена</a>
-        </div>
-    </form>
+            <!-- Обложка -->
+            <div class="mb-3 text-center">
+                <label for="{{ cover_form.cover.id_for_label }}" class="form-label">Обложка:</label>
+                <div class="mb-2">
+                    {% with book.bookcover_set.first as book_cover %}
+                        {% if book_cover and book_cover.cover %}
+                            <img src="{{ book_cover.cover.url }}" class="img-fluid rounded shadow-sm"
+                                 style="max-height: 200px;" alt="Текущая обложка" />
+                        {% else %}
+                            <p class="text-muted">Обложка отсутствует.</p>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+                <input type="file" class="form-control rounded-pill border-primary shadow-sm"
+                       name="{{ cover_form.cover.name }}" id="{{ cover_form.cover.id_for_label }}">
+                {% if cover_form.cover.errors %}
+                    <div class="text-danger small">{{ cover_form.cover.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Кнопки -->
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-warning me-2"><i class="fas fa-save"></i> Сохранить</button>
+                <a href="{% url 'book_detail' book.id %}" class="btn btn-secondary"><i class="fas fa-times"></i> Отмена</a>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

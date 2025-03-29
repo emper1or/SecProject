@@ -31,7 +31,7 @@ input[type="text"], textarea, select {
     padding: 10px;
     width: 100%;
     color: #003366;
-    font-size: 16px;
+    font-size: 25px;
     resize: none;
 }
 
@@ -50,9 +50,14 @@ select option:disabled {
     color: #666;
 }
 
-button[type="submit"] {
-    background-color: #00A1DB;
-    border: none;
+button[type="submit"].save-button {
+    width: 60%; /* Кнопка "Сохранить" займет 60% ширины контейнера */
+    padding: 10px 20px; /* Отступы внутри кнопки */
+    display: inline-block;
+    text-align: center;
+    border-radius: 5px;
+    background-color: #00A1DB; /* Синий цвет для кнопки "Сохранить" */
+    border: none; /* Убираем границу */
     color: white;
     transition: background-color 0.3s;
 }
@@ -180,3 +185,35 @@ button[type="submit"]:hover {
 .preview-container:hover img {
     transform: scale(1.05);
 }
+
+button[type="cancel"] {
+    width: 35%; /* Кнопка "Отмена" займет оставшиеся 35% */
+    margin-left: 10px; /* Отступ слева */
+    text-decoration: none; /* Убираем подчеркивание у ссылки */
+    background-color: #f44336; /* Красный цвет для кнопки "Отмена" */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    display: inline-block;
+    text-align: center;
+    cursor: pointer;
+}
+
+button[type="cancel"]:hover {
+    background-color: #d32f2f; /* Темный красный при наведении */
+}
+
+/* Обычные стили для кнопок */
+.container .btn {
+    box-sizing: border-box; /* Чтобы отступы не выходили за пределы контейнера */
+    margin-bottom: 10px; /* Отступ снизу для обеих кнопок */
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px; /* Отступ между кнопками */
+}
+
