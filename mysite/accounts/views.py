@@ -9,7 +9,7 @@ from django.core.mail import send_mail  # Импортируем функцию 
 from django.shortcuts import render, redirect, get_object_or_404
 from library.models import Book, BookCover
 
-from .forms import RegisterForm, VerificationForm, ResetPasswordForm, PasswordChangeForm
+from .forms import RegisterForm, VerificationForm, ResetPasswordForm, PasswordChangeForm, UserEditForm, UserCreationForm
 
 User = get_user_model()
 logger = logging.getLogger(__name__)  # Получаем логгер
