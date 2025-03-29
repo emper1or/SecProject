@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Добавить автора</title>
+    <title>Добавить разработчика</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap_styles.css' %}">
     <style>
         body {
@@ -60,13 +60,6 @@
             border-radius: 6px;
             font-weight: 500;
         }
-        .btn-secondary {
-            background-color: #6c757d;
-            border-color: #6c757d;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: 500;
-        }
         .btn-outline-secondary {
             border-color: #6c757d;
             color: #6c757d;
@@ -104,43 +97,6 @@
         .back-link svg {
             margin-right: 5px;
         }
-        .star {
-            color: #b3d7ff;
-            cursor: pointer;
-            font-size: 24px;
-            margin-right: 5px;
-        }
-        .star.hovered, .star.selected {
-            color: #007bff;
-        }
-        .file-upload-container {
-            background-color: #e6f2ff;
-            border: 2px dashed #b3d7ff;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            display: inline-block;
-        }
-        .file-upload-container img {
-            width: 50px;
-            opacity: 0.7;
-        }
-        .preview-container {
-            position: relative;
-            display: inline-block;
-        }
-        #close-preview {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background: white;
-            border-radius: 50%;
-            width: 25px;
-            height: 25px;
-            border: 1px solid #ccc;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -152,28 +108,28 @@
             На главную
         </a>
 
-        <h1>Добавить автора</h1>
+        <h1>Добавить разработчика</h1>
 
         <form method="post">
             {% csrf_token %}
             <fieldset>
-                <legend>Информация об авторе</legend>
+                <legend>Информация о разработчике</legend>
                 <div class="mb-4">
-                    <label for="id_name" class="form-label">Имя автора:</label>
+                    <label for="id_name" class="form-label">Название разработчика:</label>
                     <input type="text" name="name" id="id_name" class="form-control" required>
                 </div>
                 <div class="mb-4">
-                    <label for="id_bio" class="form-label">Биография автора:</label>
+                    <label for="id_bio" class="form-label">Описание разработчика:</label>
                     <textarea name="bio" id="id_bio" class="form-control bio-textarea" rows="4"></textarea>
                 </div>
             </fieldset>
 
             <div class="action-buttons">
-                <a href="{% url 'add_book' %}?book_title={{ request.GET.book_title }}&book_description={{ request.GET.book_description }}&book_author={{ request.GET.book_author }}&book_rating={{ request.GET.book_rating }}"
+                <a href="{% url 'add_game' %}?game_title={{ request.GET.game_title }}&game_description={{ request.GET.game_description }}&game_developer={{ request.GET.game_developer }}&game_rating={{ request.GET.game_rating }}"
                    class="btn btn-outline-secondary">
-                    ← Вернуться к добавлению книги
+                    ← Вернуться к добавлению игры
                 </a>
-                <button type="submit" class="btn btn-primary">Сохранить автора</button>
+                <button type="submit" class="btn btn-primary">Сохранить разработчика</button>
             </div>
         </form>
     </div>

@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Добавить книгу</title>
+    <title>Добавить игру</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap_styles.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom_styles.css' %}">
     <style>
@@ -48,24 +48,17 @@
             background-color: #6c757d;
             border-color: #6c757d;
         }
-        .btn-outline-secondary {
-            border-color: #6c757d;
-            color: #6c757d;
-        }
         .btn:hover {
             opacity: 0.9;
         }
         .star {
-            color: #007bff; /* Синие звезды по умолчанию */
+            color: #007bff; /* Изменено на синий цвет по умолчанию */
             cursor: pointer;
             font-size: 24px;
             margin-right: 5px;
         }
-        .star.hovered {
-            color: #0056b3; /* Темнее при наведении */
-        }
-        .star.selected {
-            color: #007bff; /* Оставляем синими выбранные */
+        .star.hovered, .star.selected {
+            color: #007bff;
         }
         .file-upload-container {
             background-color: #e6f2ff;
@@ -100,47 +93,33 @@
             justify-content: space-between;
             margin-top: 20px;
         }
-        h1 {
-            color: #495057;
-            margin-bottom: 25px;
-        }
-        .form-label {
-            color: #495057;
-        }
-        .invalid-feedback {
-            color: #dc3545;
-        }
         .rating-display {
             color: #495057;
             margin-left: 10px;
             font-weight: 500;
         }
-        .rating-container {
-            display: flex;
-            align-items: center;
-        }
-    </style>
+     </style>
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="mb-4">Добавить книгу</h1>
+        <h1 class="mb-4">Добавить игру</h1>
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="hidden" name="rating" id="rating-input" value="1">
 
             <fieldset class="mb-4">
-                <legend class="fs-4">Информация о книге</legend>
+                <legend class="fs-4">Информация об игре</legend>
                 <div class="mb-3 form-group">
-                    <label for="id_title" class="form-label">Название книги:</label>
+                    <label for="id_title" class="form-label">Название игры:</label>
                     <input type="text" name="title" id="id_title" class="form-control" required>
                 </div>
 
                 <div class="mb-3 form-group">
-                    <label for="id_author" class="form-label">Автор:</label>
-                    <select name="author" id="id_author" class="form-select" required>
-                        <option value="">Выберите автора</option>
-                        {% for author in authors %}
-                            <option value="{{ author.id }}">{{ author.name }}</option>
+                    <label for="id_developer" class="form-label">Разработчик:</label>
+                    <select name="developer" id="id_developer" class="form-select" required>
+                        <option value="">Выберите разработчика</option>
+                        {% for developer in developers %}
+                            <option value="{{ developer.id }}">{{ developer.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -151,26 +130,24 @@
                 </div>
 
                 <p>
-                    <a href="{% url 'add_author' %}" class="btn btn-secondary">Добавить нового автора</a>
+                    <a href="{% url 'add_developer' %}" class="btn btn-secondary">Добавить нового разработчика</a>
                 </p>
             </fieldset>
 
             <fieldset class="mb-4">
-                <legend class="fs-4">Рейтинг книги</legend>
-                <div class="rating-container">
-                    <div class="rating" id="rating-container">
-                        {% for i in "1234567891" %}
-                            <span class="star" data-value="{{ forloop.counter }}">&#9733;</span>
-                        {% endfor %}
-                    </div>
+                <legend class="fs-4">Рейтинг игры</legend>
+                <div class="rating" id="rating-container">
+                    {% for i in "1234567891" %}
+                        <span class="star" data-value="{{ forloop.counter }}">&#9733;</span>
+                    {% endfor %}
                     <span id="rating-value" class="rating-display">Рейтинг: 1/10</span>
                 </div>
             </fieldset>
 
             <fieldset class="mb-4">
-                <legend class="fs-4">Обложка книги</legend>
+                <legend class="fs-4">Обложка игры</legend>
                 <div class="mb-3">
-                    <label class="form-label">Загрузить обложку:</label>
+                    <label class="form-label" style="color: #495057;">Загрузить обложку:</label>
                     <label class="file-upload-container">
                         <img src="https://exotickozha.ru/userfiles/2849815-document-download-file-interface-multimedia_107994.png" alt="Upload">
                         <input type="file" name="cover" id="cover-upload">
@@ -184,7 +161,7 @@
 
             <div class="action-buttons">
                 <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Вернуться в кабинет</a>
-                <button type="submit" class="btn btn-primary">Сохранить книгу</button>
+                <button type="submit" class="btn btn-primary">Сохранить игру</button>
             </div>
         </form>
     </div>
@@ -194,19 +171,18 @@
         document.addEventListener("DOMContentLoaded", function() {
             let stars = document.querySelectorAll(".star");
             let ratingValue = document.getElementById("rating-value");
-            let ratingInput = document.getElementById("rating-input");
             let coverUpload = document.getElementById("cover-upload");
             let coverPreview = document.getElementById("cover-preview");
             let coverImage = document.getElementById("cover-image");
             let closePreview = document.getElementById("close-preview");
+            let currentRating = 1; // Начальный рейтинг 1
 
             // Устанавливаем начальный рейтинг (1 звезда)
             stars[0].classList.add("selected");
-            let currentRating = 1;
+            ratingValue.textContent = `Рейтинг: ${currentRating}/10`;
 
             stars.forEach((star, index) => {
                 star.addEventListener("mouseover", function() {
-                    // Подсвечиваем звезды при наведении
                     stars.forEach((s, i) => {
                         s.classList.toggle("hovered", i <= index);
                     });
@@ -214,7 +190,6 @@
                 });
 
                 star.addEventListener("mouseout", function() {
-                    // Убираем подсветку при уходе мыши
                     stars.forEach(s => s.classList.remove("hovered"));
                     // Возвращаем текущий выбранный рейтинг
                     ratingValue.textContent = `Рейтинг: ${currentRating}/10`;
@@ -223,7 +198,6 @@
                 star.addEventListener("click", function() {
                     // Обновляем текущий рейтинг
                     currentRating = index + 1;
-                    ratingInput.value = currentRating;
 
                     // Обновляем отображение звезд
                     stars.forEach((s, i) => {

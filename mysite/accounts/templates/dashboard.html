@@ -5,7 +5,6 @@
     <h1 class="text-center mb-4">Личный кабинет</h1>
 
     <h2 class="text-center mb-4">Ваши книги:</h2>
-
     <div class="table-responsive">
         <table class="table table-bordered table-hover" style="color: #ffffff;">
             <thead class="table-dark">
@@ -20,7 +19,13 @@
                 {% for book in books %}
                     <tr>
                         <td>{{ book.title }}</td>
-                        <td>{{ book.rating }}/10</td>
+                        <td>
+                            {% if book.rating %}
+                                {{ book.rating }}/10
+                            {% else %}
+                                Не оценено
+                            {% endif %}
+                        </td>
                         <td>{{ book.author.name }}</td>
                         <td>
                             <a href="{% url 'book_detail' book.id %}" class="btn btn-info">Подробнее</a>
@@ -32,9 +37,45 @@
             </tbody>
         </table>
     </div>
-
     <div class="text-center mt-4">
-        <a href="{% url 'add_book' %}" class="btn btn-primary" style="color: #000000;" >Добавить книгу</a>
+        <a href="{% url 'add_book' %}" class="btn btn-primary" style="color: #000000;">Добавить книгу</a>
+    </div>
+
+    <h2 class="text-center mb-4 mt-5">Ваши игры:</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover" style="color: #ffffff;">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">Название</th>
+                    <th scope="col">Рейтинг</th>
+                    <th scope="col">Разработчик</th>
+                    <th scope="col">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for game in games %}
+                    <tr>
+                        <td>{{ game.title }}</td>
+                        <td>
+                            {% if game.rating %}
+                                {{ game.rating }}/10
+                            {% else %}
+                                Не оценено
+                            {% endif %}
+                        </td>
+                        <td>{{ game.developer.name }}</td>
+                        <td>
+                            <a href="{% url 'game_detail' game.id %}" class="btn btn-info">Подробнее</a>
+                            <a href="{% url 'edit_game' game.id %}" class="btn btn-warning">Редактировать</a>
+                            <a href="{% url 'delete_game' game.id %}" class="btn btn-danger">Удалить</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="text-center mt-4">
+        <a href="{% url 'add_game' %}" class="btn btn-primary" style="color: #000000;">Добавить игру</a>
     </div>
 </div>
 {% endblock %}
