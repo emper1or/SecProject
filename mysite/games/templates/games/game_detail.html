@@ -1,0 +1,52 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/games/game_detail_style.css' %}">
+
+<div class="container mt-5 d-flex flex-column align-items-center">
+    <div class="card shadow-lg p-4 mb-5 bg-white rounded" style="max-width: 800px; width: 100%;">
+        <h2 class="text-center text-primary mb-4">{{ game.title }}</h2>
+
+        <div class="row">
+            <div class="col-md-4 d-flex justify-content-center">
+                {% for cover in covers %}
+                    {% if cover.game == game %}
+                        <img src="{{ cover.cover.url }}" alt="Обложка игры {{ game.title }}" class="img-fluid rounded shadow" />
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="col-md-8">
+                <div class="info-block mb-3">
+                    <strong class="text-secondary">Разработчик:</strong>
+                    <p class="text-dark">{{ game.developer.name }}</p>
+                </div>
+                <div class="info-block mb-3">
+                    <strong class="text-secondary">Информация о разработчике:</strong>
+                    <p class="text-muted">{{ game.developer.bio }}</p>
+                </div>
+                <div class="info-block mb-3">
+                    <strong class="text-secondary">Описание:</strong>
+                    <p class="text-dark">{{ game.description }}</p>
+                </div>
+                <div class="info-block">
+                    <strong class="text-secondary">Рейтинг:</strong>
+                    <p class="text-warning"><i class="fas fa-star"></i> {{ game.rating }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions mt-4 text-center">
+            <a href="{% url 'edit_game' game.id %}" class="btn btn-warning me-2" title="Редактировать игру">
+                <i class="fas fa-edit"></i> Редактировать
+            </a>
+            <a href="{% url 'delete_game' game.id %}" class="btn btn-danger me-2" title="Удалить игру">
+                <i class="fas fa-trash"></i> Удалить
+            </a>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary" title="Вернуться к списку игр">
+                <i class="fas fa-arrow-left"></i> Назад к списку
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

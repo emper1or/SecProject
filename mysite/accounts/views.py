@@ -2,14 +2,16 @@ import logging
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.mail import send_mail  # Импортируем функцию для отправки почты
 from django.shortcuts import render, redirect, get_object_or_404
+
+from games.models import Game, GameCover
 from library.models import Book, BookCover
 
-from .forms import RegisterForm, VerificationForm, ResetPasswordForm, PasswordChangeForm
+from .forms import RegisterForm, VerificationForm, ResetPasswordForm, PasswordChangeForm, UserEditForm
 
 User = get_user_model()
 logger = logging.getLogger(__name__)  # Получаем логгер
@@ -62,26 +64,29 @@ def login_view(request):
 
 def send_verification_email(email, verification_code):
     """
-    Отправляет письмо с кодом верификации на указанный email-адрес через SMTP Django.
+    Отправляет письмо с кодом верификации на указанную почту только в режиме продакшен.
     """
-    subject = 'Код верификации'
-    message = f'Ваш код верификации: {verification_code}'
-    from_email = settings.DEFAULT_FROM_EMAIL  # Email отправителя из настроек
-    recipient_list = [email]
-    html_message = f'<p>Ваш код верификации: <strong>{verification_code}</strong></p>'  # Html версия
-
+    if settings.DEBUG:
+        # Если Django работает в режиме разработки, просто логируем попытку отправки.
+        logger.debug(f'DEBUG mode: email НЕ отправляется. Код: {verification_code}, email: {email}')
+        return
     try:
+        subject = 'Код верификации'
+        message = f'Ваш код верификации: {verification_code}'
+        from_email = settings.DEFAULT_FROM_EMAIL  # Email отправителя из настроек
+        recipient_list = [email]
+        html_message = f'<p>Ваш код верификации: <strong>{verification_code}</strong></p>'
+
         logger.debug(f'Отправка email на {email}...')
         send_mail(
             subject,
             message,
             from_email,
             recipient_list,
-            fail_silently=False,  # False вызывает исключение при ошибке отправки
-            html_message=html_message  #Передаем html версию
+            fail_silently=False,  # Exception при ошибке
+            html_message=html_message
         )
         logger.info(f'Письмо успешно отправлено на {email}')
-
     except Exception as e:
         logger.error(f'Ошибка отправки письма на {email}: {e}')
 
@@ -129,12 +134,16 @@ def logout_view(request):
 def dashboard(request):
     user = request.user
     books = Book.objects.filter(users=user)  # Получаем книги пользователя
-    covers = BookCover.objects.filter(book__in=books)  # Получаем обложки для этих книг
+    games = Game.objects.filter(users=user)  # Получаем игры пользователя
+    book_covers = BookCover.objects.filter(book__in=books)  # Получаем обложки для книг
+    game_covers = GameCover.objects.filter(game__in=games)  # Получаем обложки для игр
 
     context = {
         'user': user,
         'books': books,
-        'covers': covers,
+        'games': games,
+        'book_covers': book_covers,
+        'game_covers': game_covers,
     }
     return render(request, 'dashboard.html', context)
 

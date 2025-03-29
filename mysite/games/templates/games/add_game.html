@@ -1,0 +1,163 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить игру</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap_styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom_styles.css' %}">
+    <style>
+        .parallax-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .parallax-img {
+            position: absolute;
+            width: 120px;
+            opacity: 0.2;
+            animation: float 8s infinite alternate ease-in-out;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(15px) rotate(5deg); }
+        }
+
+        .parallax-img:nth-child(1) { top: 90%; left: 5%; animation-delay: 0s; }
+        .parallax-img:nth-child(2) { top: 45%; left: 30%; animation-delay: 1s; }
+        .parallax-img:nth-child(3) { top: 80%; left: 90%; animation-delay: 2s; }
+        .parallax-img:nth-child(4) { top: 50%; left: 87%; animation-delay: 3s; }
+        .parallax-img:nth-child(5) { top: 10%; left: 15%; animation-delay: 4s; }
+        .parallax-img:nth-child(6) { top: 10%; left: 60%; animation-delay: 5s; }
+        .parallax-img:nth-child(7) { top: 10%; left: 85%; animation-delay: 6s; }
+        .parallax-img:nth-child(8) { top: 95%; left: 50%; animation-delay: 7s; }
+        .parallax-img:nth-child(9) { top: 45%; left: 10%; animation-delay: 8s; }
+        .parallax-img:nth-child(10) { top: 45%; left: 75%; animation-delay: 9s; }
+
+        .container {
+            background: transparent;
+        }
+
+        h1 {
+            color: #003366;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="parallax-container">
+        <img src="https://em-content.zobj.net/source/apple/391/video-game_1f3ae.png" class="parallax-img">
+        <img src="https://em-content.zobj.net/source/apple/391/joystick_1f579-fe0f.png" class="parallax-img">
+        <img src="https://em-content.zobj.net/source/apple/391/game-die_1f3b2.png" class="parallax-img">
+        <img src="https://em-content.zobj.net/source/apple/391/direct-hit_1f3af.png" class="parallax-img">
+        <img src="https://em-content.zobj.net/source/apple/391/slot-machine_1f3b0.png" class="parallax-img">
+        <img src="https://em-content.zobj.net/source/apple/391/rocket_1f680.png" class="parallax-img">
+        <img src="https://em-content.zobj.net/source/apple/391/alien-monster_1f47e.png" class="parallax-img">
+        <img src="https://em-content.zobj.net/source/apple/391/space-invader_1f47f.png" class="parallax-img">
+        <img src="https://em-content.zobj.net/source/apple/391/video-camera_1f4f9.png" class="parallax-img">
+        <img src="https://em-content.zobj.net/source/apple/391/clapper-board_1f3ac.png" class="parallax-img">
+    </div>
+
+    <div class="container mt-5">
+        <h1 class="mb-4">Добавить игру</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <fieldset class="mb-4">
+                <legend class="fs-4">Информация об игре</legend>
+                <div class="mb-3">
+                    <label for="id_title" class="form-label">Название игры:</label>
+                    <input type="text" name="title" id="id_title" class="form-control" required maxlength="200">
+                </div>
+                <div class="mb-3">
+                    <label for="id_description" class="form-label">Описание игры:</label>
+                    <textarea name="description" id="id_description" class="form-control"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="id_developer" class="form-label">Разработчик:</label>
+                    <select name="developer" id="id_developer" class="form-select" required>
+                        <option value="">Выберите разработчика</option>
+                        {% for developer in developers %}
+                            <option value="{{ developer.id }}">{{ developer.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <p>
+                    <button type="submit" name="add_developer" class="btn btn-secondary">Добавить нового разработчика</button>
+                </p>
+            </fieldset>
+
+            <fieldset class="mb-4">
+                <legend class="fs-4">Рейтинг игры</legend>
+                <label for="rating-slider">Выберите рейтинг:</label>
+                <input type="range" id="rating-slider" name="rating" min="1" max="10" step="1" value="5" oninput="ratingValue.textContent = this.value">
+                <span id="ratingValue">5</span> / 10
+            </fieldset>
+
+            <fieldset class="mb-4">
+                <legend class="fs-4">Обложка игры</legend>
+                <div class="mb-3">
+                    <label class="form-label">Загрузить обложку:</label>
+                    <label class="file-upload-container">
+                        <img src="https://exotickozha.ru/userfiles/2849815-document-download-file-interface-multimedia_107994.png" alt="Upload">
+                        <input type="file" name="cover" id="cover-upload">
+                    </label>
+                    <div id="cover-preview" class="mt-2 preview-container" style="display: none;">
+                        <button id="close-preview">&times;</button>
+                        <img id="cover-image" src="" class="img-thumbnail">
+                    </div>
+                </div>
+            </fieldset>
+
+            <button type="submit" class="btn btn-primary save-button">Сохранить</button>
+            <a href="javascript:history.back()" type="cancel" class="btn btn-danger cancel-button">Отмена</a>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let ratingSlider = document.getElementById("rating-slider");
+            let ratingValue = document.getElementById("ratingValue");
+            let coverUpload = document.getElementById("cover-upload");
+            let coverPreview = document.getElementById("cover-preview");
+            let coverImage = document.getElementById("cover-image");
+            let closePreview = document.getElementById("close-preview");
+
+            // Устанавливаем сохраненный рейтинг из сессии
+            let initialRating = "{{ initial_rating }}";
+            if (initialRating) {
+                ratingSlider.value = initialRating;
+                ratingValue.textContent = initialRating;
+            }
+
+            // Обновление значения при изменении ползунка
+            ratingSlider.addEventListener("input", function() {
+                ratingValue.textContent = this.value;
+            });
+
+            // Загрузка изображения обложки
+            coverUpload.addEventListener("change", function(event) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    coverImage.src = e.target.result;
+                    coverPreview.style.display = "block";
+                };
+                reader.readAsDataURL(event.target.files[0]);
+            });
+
+            closePreview.addEventListener("click", function() {
+                coverPreview.style.display = "none";
+                coverUpload.value = "";
+            });
+        });
+    </script>
+</body>
+</html>

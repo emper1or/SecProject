@@ -4,28 +4,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Добавить автора</title>
+    <title>Добавить разработчика</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap_styles.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom_styles.css' %}">
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="mb-4">Добавить автора</h1>
-        <form method="post">
+        <h1 class="mb-4">Добавить разработчика</h1>
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <fieldset class="mb-4">
-                <legend class="fs-4">Информация об авторе</legend>
+                <legend class="fs-4">Информация о разработчике</legend>
                 <div class="mb-3">
-                    <label for="id_name" class="form-label">Имя автора:</label>
-                    <input type="text" name="name" id="id_name" class="form-control" required>
+                    <label for="id_name" class="form-label">Название разработчика:</label>
+                    <input type="text" name="name" id="id_name" class="form-control" required maxlength="100">
                 </div>
                 <div class="mb-3">
-                    <label for="id_bio" class="form-label">Биография автора:</label>
+                    <label for="id_bio" class="form-label">Описание разработчика:</label>
                     <textarea name="bio" id="id_bio" class="form-control bio-textarea"></textarea>
                 </div>
             </fieldset>
             <button type="submit" class="btn btn-primary">Сохранить</button>
-            <a href="{% url 'add_book' %}" class="btn btn-secondary">Вернуться к добавлению книги</a>
+            <a href="{% url 'add_game' %}" class="btn btn-secondary">Вернуться к добавлению игры</a>
         </form>
     </div>
 
