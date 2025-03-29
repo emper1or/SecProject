@@ -64,12 +64,14 @@
             <div class="mb-3 text-center">
                 <label for="{{ cover_form.cover.id_for_label }}" class="form-label">Обложка:</label>
                 <div class="mb-2">
-                    {% if book.bookcover_set.first %}
-                        <img src="{{ book.bookcover_set.first.cover.url }}" class="img-fluid rounded shadow-sm"
-                             style="max-height: 200px;" alt="Текущая обложка" />
-                    {% else %}
-                        <p class="text-muted">Обложка отсутствует.</p>
-                    {% endif %}
+                    {% with book.bookcover_set.first as book_cover %}
+                        {% if book_cover and book_cover.cover %}
+                            <img src="{{ book_cover.cover.url }}" class="img-fluid rounded shadow-sm"
+                                 style="max-height: 200px;" alt="Текущая обложка" />
+                        {% else %}
+                            <p class="text-muted">Обложка отсутствует.</p>
+                        {% endif %}
+                    {% endwith %}
                 </div>
                 <input type="file" class="form-control rounded-pill border-primary shadow-sm"
                        name="{{ cover_form.cover.name }}" id="{{ cover_form.cover.id_for_label }}">
