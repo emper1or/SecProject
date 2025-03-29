@@ -2,15 +2,75 @@
 {% load static %}
 
 {% block content %}
-<div class="delete-game-container">
-    <h2>Удаление игры</h2>
-    <p>Вы уверены, что хотите удалить игру <strong>{{ game.title }}</strong>?</p>
-    <form method="post">
-        {% csrf_token %}
-        <div class="form-actions">
-            <button type="submit" class="btn btn-danger">Да, удалить</button>
-            <a href="{% url 'game_detail' game.id %}" class="btn btn-secondary">Отмена</a>
-        </div>
-    </form>
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+    <div class="delete-game-container text-center">
+        <h2 class="text-danger fw-bold mt-3">Удаление игры</h2>
+        <p class="fs-5 mt-2">Вы уверены, что хотите удалить игру <strong class="text-primary">{{ game.title }}</strong>?</p>
+
+        <form method="post" class="mt-3">
+            {% csrf_token %}
+            <div class="d-flex justify-content-center gap-3">
+                <button type="submit" class="btn btn-danger px-4 py-2 fw-bold shadow-sm">
+                    <i class="fas fa-trash-alt"></i> Да, удалить
+                </button>
+                <a href="{% url 'game_detail' game.id %}" class="btn btn-outline-secondary px-4 py-2 fw-bold shadow-sm">
+                    <i class="fas fa-times"></i> Отмена
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-game-container {
+        max-width: 500px;
+        width: 100%;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+    }
+
+    .d-flex {
+        display: flex;
+    }
+
+    .justify-content-center {
+        justify-content: center;
+    }
+
+    .align-items-center {
+        align-items: center;
+    }
+
+    .min-vh-100 {
+        min-height: 100vh;
+    }
+
+    footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        background-color: #f8f9fa;
+        padding: 1rem 0;
+    }
+
+    h2 {
+        margin-top: -20rem;
+    }
+
+    p.fs-5 {
+        margin-top: 1rem;
+    }
+
+    .mt-3 {
+        margin-top: 1rem;
+    }
+
+    .d-flex .btn {
+        margin-top: 1rem;
+    }
+</style>
 {% endblock %}

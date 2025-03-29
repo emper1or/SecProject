@@ -6,131 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Добавить разработчика</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap_styles.css' %}">
-    <style>
-        body {
-            background: linear-gradient(135deg, #b3d7ff, #f8f9fa);
-            min-height: 100vh;
-        }
-        .container {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            padding: 30px;
-            margin-top: 40px;
-            margin-bottom: 40px;
-        }
-        h1 {
-            color: #2c3e50;
-            font-weight: 600;
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 15px;
-            margin-bottom: 25px;
-        }
-        fieldset {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 30px;
-        }
-        legend {
-            color: #3498db;
-            font-weight: 600;
-            font-size: 1.2rem;
-            background: white;
-            padding: 0 15px;
-            border: 1px solid #dee2e6;
-            border-radius: 20px;
-            width: auto;
-        }
-        .form-control, .form-select {
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            padding: 10px 15px;
-            background-color: white;
-        }
-        .form-control:focus, .form-select:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
-        }
-        .btn-primary {
-            background-color: #3498db;
-            border-color: #3498db;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: 500;
-        }
-        .btn-outline-secondary {
-            border-color: #6c757d;
-            color: #6c757d;
-        }
-        .btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-        .action-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 25px;
-        }
-        .bio-textarea {
-            min-height: 120px;
-        }
-        .back-link {
-            color: white;
-            background-color: #3498db;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            margin-bottom: 15px;
-            padding: 8px 15px;
-            border-radius: 6px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .back-link:hover {
-            background-color: #2980b9;
-            text-decoration: none;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .back-link svg {
-            margin-right: 5px;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/custom_styles.css' %}">
 </head>
 <body>
-    <div class="container">
-        <a href="{% url 'dashboard' %}" class="back-link">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
-            </svg>
-            На главную
-        </a>
-
-        <h1>Добавить разработчика</h1>
-
-        <form method="post">
+    <div class="container mt-5">
+        <h1 class="mb-4">Добавить разработчика</h1>
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <fieldset>
-                <legend>Информация о разработчике</legend>
-                <div class="mb-4">
+            <fieldset class="mb-4">
+                <legend class="fs-4">Информация о разработчике</legend>
+                <div class="mb-3">
                     <label for="id_name" class="form-label">Название разработчика:</label>
-                    <input type="text" name="name" id="id_name" class="form-control" required>
+                    <input type="text" name="name" id="id_name" class="form-control" required maxlength="100">
                 </div>
-                <div class="mb-4">
+                <div class="mb-3">
                     <label for="id_bio" class="form-label">Описание разработчика:</label>
-                    <textarea name="bio" id="id_bio" class="form-control bio-textarea" rows="4"></textarea>
+                    <textarea name="bio" id="id_bio" class="form-control bio-textarea"></textarea>
                 </div>
             </fieldset>
-
-            <div class="action-buttons">
-                <a href="{% url 'add_game' %}?game_title={{ request.GET.game_title }}&game_description={{ request.GET.game_description }}&game_developer={{ request.GET.game_developer }}&game_rating={{ request.GET.game_rating }}"
-                   class="btn btn-outline-secondary">
-                    ← Вернуться к добавлению игры
-                </a>
-                <button type="submit" class="btn btn-primary">Сохранить разработчика</button>
-            </div>
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <a href="{% url 'add_game' %}" class="btn btn-secondary">Вернуться к добавлению игры</a>
         </form>
     </div>
 

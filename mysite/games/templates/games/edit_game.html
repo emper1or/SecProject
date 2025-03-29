@@ -2,65 +2,90 @@
 {% load static %}
 
 {% block content %}
-<div class="edit-game-container">
-    <link rel="stylesheet" href="{% static 'css/library/edit_game_style.css' %}">
-    <h2>Редактировать игру: {{ game.title }}</h2>
+<link rel="stylesheet" href="{% static 'css/games/edit_game_style.css' %}">
 
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
+<div class="container mt-5">
+    <div class="card shadow-lg p-4 mb-5 bg-white rounded" style="max-width: 600px; margin: auto;">
+        <h2 class="text-center text-primary mb-4">Редактировать игру: {{ game.title }}</h2>
 
-        <!-- Форма для игры -->
-        <div class="form-group">
-            <label for="{{ game_form.title.id_for_label }}">Название игры:</label>
-            {{ game_form.title }}
-            {% if game_form.title.errors %}
-            <div class="error-message">{{ game_form.title.errors }}</div>
-            {% endif %}
-        </div>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
 
-        <div class="form-group">
-            <label for="{{ game_form.title.id_for_label }}">Рейтинг</label>
-            {{ game_form.rating }}
-            {% if game_form.title.errors %}
-            <div class="error-message">{{ game_form.title.errors }}</div>
-            {% endif %}
-        </div>
+            <!-- Название игры -->
+            <div class="mb-3">
+                <label for="{{ game_form.title.id_for_label }}" class="form-label">Название игры:</label>
+                <input type="text" class="form-control rounded-pill border-primary shadow-sm"
+                       id="{{ game_form.title.id_for_label }}" name="{{ game_form.title.name }}"
+                       value="{{ game_form.title.value }}">
+                {% if game_form.title.errors %}
+                    <div class="text-danger small">{{ game_form.title.errors }}</div>
+                {% endif %}
+            </div>
 
-        <div class="form-group">
-            <label for="{{ game_form.description.id_for_label }}">Описание:</label>
-            {{ game_form.description }}
-            {% if game_form.description.errors %}
-            <div class="error-message">{{ game_form.description.errors }}</div>
-            {% endif %}
-        </div>
+            <!-- Рейтинг -->
+            <div class="mb-3">
+                <label for="{{ game_form.rating.id_for_label }}" class="form-label">Рейтинг:</label>
+                <input type="number" class="form-control rounded-pill border-primary shadow-sm"
+                       id="{{ game_form.rating.id_for_label }}" name="{{ game_form.rating.name }}"
+                       value="{{ game_form.rating.value }}" step="1" min="0" max="10">
+                {% if game_form.rating.errors %}
+                    <div class="text-danger small">{{ game_form.rating.errors }}</div>
+                {% endif %}
+            </div>
 
-        <div class="form-group">
-            <label for="{{ game_form.developer.id_for_label }}">Разработчик:</label>
-            {{ game_form.developer }}
-            {% if game_form.developer.errors %}
-            <div class="error-message">{{ game_form.developer.errors }}</div>
-            {% endif %}
-        </div>
+            <!-- Описание -->
+            <div class="mb-3">
+                <label for="{{ game_form.description.id_for_label }}" class="form-label">Описание:</label>
+                <textarea class="form-control rounded border-primary shadow-sm"
+                          id="{{ game_form.description.id_for_label }}" name="{{ game_form.description.name }}"
+                          rows="4">{{ game_form.description.value }}</textarea>
+                {% if game_form.description.errors %}
+                    <div class="text-danger small">{{ game_form.description.errors }}</div>
+                {% endif %}
+            </div>
 
-        <!-- Форма для обложки -->
-        <div class="form-group">
-            <label for="{{ cover_form.cover.id_for_label }}">Обложка:</label>
-            {% if game.gamecover_set.first %}
-                <img src="{{ game.gamecover_set.first.cover.url }}" class="cover-image" alt="Текущая обложка" />
-            {% else %}
-                <p>Обложка отсутствует.</p>
-            {% endif %}
-            <input type="file" name="{{ cover_form.cover.name }}" id="{{ cover_form.cover.id_for_label }}">
-            {% if cover_form.cover.errors %}
-            <div class="error-message">{{ cover_form.cover.errors }}</div>
-            {% endif %}
-        </div>
+            <!-- Разработчик -->
+            <div class="mb-3">
+                <label for="{{ game_form.developer.id_for_label }}" class="form-label">Разработчик:</label>
+                <select name="{{ game_form.developer.name }}" id="{{ game_form.developer.id_for_label }}"
+                        class="form-select rounded-pill border-primary shadow-sm">
+                    {% for developer in game_form.developer.field.queryset %}
+                        <option value="{{ developer.id }}" {% if developer.id == game_form.developer.value %}selected{% endif %}>
+                            {{ developer.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if game_form.developer.errors %}
+                    <div class="text-danger small">{{ game_form.developer.errors }}</div>
+                {% endif %}
+            </div>
 
-        <!-- Кнопки -->
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
-            <a href="{% url 'game_detail' game.id %}" class="btn btn-secondary">Отмена</a>
-        </div>
-    </form>
+            <!-- Обложка -->
+            <div class="mb-3 text-center">
+                <label for="{{ cover_form.cover.id_for_label }}" class="form-label">Обложка:</label>
+                <div class="mb-2">
+                    {% with game.gamecover_set.first as game_cover %}
+                        {% if game_cover and game_cover.cover %}
+                            <img src="{{ game_cover.cover.url }}" class="img-fluid rounded shadow-sm"
+                                 style="max-height: 200px;" alt="Текущая обложка" />
+                        {% else %}
+                            <p class="text-muted">Обложка отсутствует.</p>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+                <input type="file" class="form-control rounded-pill border-primary shadow-sm"
+                       name="{{ cover_form.cover.name }}" id="{{ cover_form.cover.id_for_label }}">
+                {% if cover_form.cover.errors %}
+                    <div class="text-danger small">{{ cover_form.cover.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Кнопки -->
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-warning me-2"><i class="fas fa-save"></i> Сохранить</button>
+                <a href="{% url 'game_detail' game.id %}" class="btn btn-secondary"><i class="fas fa-times"></i> Отмена</a>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

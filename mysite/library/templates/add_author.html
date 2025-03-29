@@ -10,7 +10,7 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="mb-4">Добавить автора </h1>
+        <h1 class="mb-4">Добавить автора</h1>
         <form method="post">
             {% csrf_token %}
             <fieldset class="mb-4">
@@ -25,6 +25,7 @@
                 </div>
             </fieldset>
             <button type="submit" class="btn btn-primary">Сохранить</button>
+            <a href="{% url 'add_book' %}" class="btn btn-secondary">Вернуться к добавлению книги</a>
         </form>
     </div>
 
