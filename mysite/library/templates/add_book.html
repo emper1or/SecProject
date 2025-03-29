@@ -151,6 +151,24 @@
             <a href="javascript:history.back()" type="cancel" class="btn btn-danger cancel-button">Отмена</a>
         </form>
     </div>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let ratingSlider = document.getElementById("rating-slider");
+        let ratingValue = document.getElementById("ratingValue");
+
+        // Устанавливаем сохраненный рейтинг из сессии
+        let initialRating = "{{ initial_rating }}";
+        if (initialRating) {
+            ratingSlider.value = initialRating;
+            ratingValue.textContent = initialRating;
+        }
+
+        // Обновление значения при изменении ползунка
+        ratingSlider.addEventListener("input", function() {
+            ratingValue.textContent = this.value;
+        });
+    });
+</script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>

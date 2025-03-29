@@ -27,7 +27,7 @@
                 <label for="{{ book_form.rating.id_for_label }}" class="form-label">Рейтинг:</label>
                 <input type="number" class="form-control rounded-pill border-primary shadow-sm"
                        id="{{ book_form.rating.id_for_label }}" name="{{ book_form.rating.name }}"
-                       value="{{ book_form.rating.value }}" step="0.1" min="0" max="10">
+                       value="{{ book_form.rating.value }}" step="1" min="0" max="10">
                 {% if book_form.rating.errors %}
                     <div class="text-danger small">{{ book_form.rating.errors }}</div>
                 {% endif %}

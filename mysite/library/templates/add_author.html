@@ -10,7 +10,7 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="mb-4">Добавить автора </h1>
+        <h1 class="mb-4">Добавить автора</h1>
         <form method="post">
             {% csrf_token %}
             <fieldset class="mb-4">
@@ -23,13 +23,9 @@
                     <label for="id_bio" class="form-label">Биография автора:</label>
                     <textarea name="bio" id="id_bio" class="form-control bio-textarea"></textarea>
                 </div>
-                <p>
-                    <a href="{% url 'add_book' %}?book_title={{ request.GET.book_title }}&book_description={{ request.GET.book_description }}&book_author={{ request.GET.book_author }}&book_rating={{ request.GET.book_rating }}" class="btn">
-                        Вернуться к добавлению книги
-                    </a>
-                </p>
             </fieldset>
             <button type="submit" class="btn btn-primary">Сохранить</button>
+            <a href="{% url 'add_book' %}" class="btn btn-secondary">Вернуться к добавлению книги</a>
         </form>
     </div>
 
