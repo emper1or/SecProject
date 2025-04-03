@@ -5,7 +5,8 @@ from .utils import get_book_suggestions, get_book_details, get_author_info
 from django.http import JsonResponse
 
 from .forms import BookForm, BookCoverForm
-from .models import Author, Book, BookCover, Author_Test
+from .models import Author, Book, BookCover
+
 
 
 @login_required
@@ -81,7 +82,7 @@ def success(request):
 
 
 @login_required
-def book_detail(request, pk):
+def book_details(request, pk):
     book = get_object_or_404(Book, id=pk)
     covers = BookCover.objects.filter(book=book)
     return render(request, 'book_detail.html', {'book': book, 'covers': covers})
@@ -113,7 +114,7 @@ def edit_book(request, pk):
             cover.book = book  # Связываем обложку с книгой
             cover.save()
 
-            return redirect('book_detail', pk=book.id)
+            return redirect('book_details', pk=book.id)
     else:
         book_form = BookForm(instance=book)
         cover_form = BookCoverForm(instance=book_cover)

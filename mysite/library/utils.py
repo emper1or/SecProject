@@ -15,7 +15,7 @@ def get_book_suggestions(query):
     params = {
         "q": query,
         "langRestrict": "ru",
-        "maxResults": 5,
+        "maxResults": 10,
         "fields": "items(id,volumeInfo/title,volumeInfo/authors)"
     }
 
@@ -57,6 +57,7 @@ def get_book_details(book_id):
         'cover': volume_info.get('imageLinks', {}).get('thumbnail', ''),
         'publisher': volume_info.get('publisher', ''),
         'page_count': volume_info.get('pageCount', ''),
+        'categories':  volume_info.get('categories', ''),
         'first_author': authors[0] if authors else None  # Для ссылки на первого автора
     }
 

@@ -26,6 +26,7 @@
             {% if book.published_date %}<span>Год: {{ book.published_date }}</span>{% endif %}
             {% if book.publisher %}<span>Издатель: {{ book.publisher }}</span>{% endif %}
             {% if book.page_count %}<span>Страниц: {{ book.page_count }}</span>{% endif %}
+            {% if book.categories %}<span>Жанр: {{ book.categories }}</span>{% endif %}
         </div>
 
         {% if book.description %}
