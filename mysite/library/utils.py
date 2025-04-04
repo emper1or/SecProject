@@ -8,9 +8,6 @@ logger = logging.getLogger(__name__)
 
 def get_book_suggestions(query):
     """Получаем подсказки из Google Books API"""
-    cache_key = f"books_suggestions:{query}"
-    if cache.get(cache_key):
-        return cache.get(cache_key)
 
     params = {
         "q": query,
@@ -32,15 +29,11 @@ def get_book_suggestions(query):
             'text': f"{title} - {authors}"
         })
 
-    cache.set(cache_key, suggestions, 60 * 60)
     return suggestions
 
 
 def get_book_details(book_id):
     """Получаем детали книги по ID"""
-    cache_key = f"book_details:{book_id}"
-    if cache.get(cache_key):
-        return cache.get(cache_key)
 
     response = requests.get(f"https://www.googleapis.com/books/v1/volumes/{book_id}")
     data = response.json()
@@ -61,15 +54,12 @@ def get_book_details(book_id):
         'first_author': authors[0] if authors else None  # Для ссылки на первого автора
     }
 
-    cache.set(cache_key, book_data, 60 * 60 * 24)
+
     return book_data
 
 
 def get_author_info(author_name):
     """Получаем информацию об авторе из различных API"""
-    cache_key = f"author_info:{author_name.lower()}"
-    if cached := cache.get(cache_key):
-        return cached
 
     # 1. Пробуем Wikipedia API (для биографии и фото)
     wiki_data = get_wikipedia_author_info(author_name)
@@ -90,7 +80,6 @@ def get_author_info(author_name):
         'first_publication': gb_data.get('first_publication')
     }
 
-    cache.set(cache_key, author_data, 60 * 60 * 24)  # Кэш на 1 день
     return author_data
 
 
