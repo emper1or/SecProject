@@ -1,0 +1,190 @@
+<!-- books/templates/books/author_detail.html -->
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="author-detail">
+    <div class="author-header">
+        {% if author.photo %}
+        <img src="{{ author.photo }}" alt="{{ author.name }}" class="author-photo">
+        {% else %}
+        <div class="author-photo placeholder">
+            <i class="fas fa-user"></i>
+        </div>
+        {% endif %}
+        <div class="author-title">
+            <h1>{{ author.name }}</h1>
+            {% if author.books_count %}
+            <div class="author-meta">
+                <span class="badge">{{ author.books_count }} книг в Google Books</span>
+                {% if author.first_publication %}
+                <span>Первая публикация: {{ author.first_publication }}</span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="author-bio">
+        {% if author.bio %}
+            <h3>Биография</h3>
+            <p>{{ author.bio }}</p>
+        {% else %}
+            <p class="text-muted">Биография автора пока недоступна.</p>
+        {% endif %}
+
+        <div class="author-dates">
+            {% if author.birth_date %}
+            <p><strong>Дата рождения:</strong> {{ author.birth_date }}</p>
+            {% endif %}
+            {% if author.death_date %}
+            <p><strong>Дата смерти:</strong> {{ author.death_date }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="author-external">
+        <h3>Больше информации:</h3>
+        <div class="external-links">
+            <a href="https://ru.wikipedia.org/w/index.php?search={{ author.name|urlencode }}"
+               target="_blank" class="btn btn-outline-primary">
+                <i class="fab fa-wikipedia-w"></i> Wikipedia
+            </a>
+            <a href="https://www.google.com/search?q={{ author.name|urlencode }}+автор"
+               target="_blank" class="btn btn-outline-primary">
+                <i class="fab fa-google"></i> Google
+            </a>
+            <a href="https://openlibrary.org/search?q={{ author.name|urlencode }}&mode=everything"
+               target="_blank" class="btn btn-outline-primary">
+                <i class="fas fa-book-open"></i> OpenLibrary
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.author-detail {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+.author-header {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+.author-photo {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #eee;
+    flex-shrink: 0;
+}
+.author-photo.placeholder {
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 50px;
+    color: #ccc;
+}
+.author-title {
+    flex-grow: 1;
+}
+.author-meta {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #666;
+}
+.author-meta .badge {
+    background: #4a6baf;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    margin-right: 10px;
+}
+.author-bio {
+    margin-bottom: 40px;
+    line-height: 1.7;
+    color: #444;
+}
+.author-bio h3 {
+    color: #333;
+    margin-bottom: 15px;
+}
+.author-dates {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 5px;
+}
+.author-books {
+    margin-top: 30px;
+}
+.book-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+}
+.book-item {
+    margin: 0;
+}
+.book-link {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 15px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.book-link:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+.book-title {
+    font-weight: 500;
+}
+.book-year {
+    color: #6c757d;
+    font-size: 0.9em;
+}
+.author-external {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+.external-links {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.btn-outline-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+.alert {
+    padding: 15px;
+    border-radius: 5px;
+}
+.alert-info {
+    background: #e7f5ff;
+    color: #1864ab;
+}
+.text-muted {
+    color: #6c757d;
+}
+</style>
+{% endblock %}
