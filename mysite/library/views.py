@@ -1,10 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-
+from .utils import get_book_suggestions, get_book_details, get_author_info
+from django.http import JsonResponse
 
 from .forms import BookForm, BookCoverForm
 from .models import Author, Book, BookCover
+
+
 
 @login_required
 def add_author(request):
@@ -72,16 +75,18 @@ def add_book(request):
         'initial_cover': initial_cover,
     })
 
+
 @login_required
 def success(request):
     return render(request, 'success.html')
 
 
 @login_required
-def book_detail(request, pk):
+def book_details(request, pk):
     book = get_object_or_404(Book, id=pk)
     covers = BookCover.objects.filter(book=book)
     return render(request, 'book_detail.html', {'book': book, 'covers': covers})
+
 
 @login_required
 def edit_book(request, pk):
@@ -109,7 +114,7 @@ def edit_book(request, pk):
             cover.book = book  # Связываем обложку с книгой
             cover.save()
 
-            return redirect('book_detail', pk=book.id)
+            return redirect('book_details', pk=book.id)
     else:
         book_form = BookForm(instance=book)
         cover_form = BookCoverForm(instance=book_cover)
@@ -119,6 +124,8 @@ def edit_book(request, pk):
         'cover_form': cover_form,
         'book': book,
     })
+
+
 @login_required
 def delete_book(request, pk):
     book = get_object_or_404(Book, id=pk)
@@ -130,3 +137,40 @@ def delete_book(request, pk):
         book.delete()
         return redirect('dashboard')
     return render(request, 'delete_book.html', {'book': book})
+
+
+def book_search(request):
+    return render(request, 'search.html')
+
+
+def autocomplete(request):
+    query = request.GET.get('term', '')
+    suggestions = get_book_suggestions(query)
+    return JsonResponse(suggestions, safe=False)
+
+
+def book_detail(request, book_id):
+    # Получаем полные данные о книге
+    book_data = get_book_details(book_id)
+    return render(request, 'book_details_test.html', {'book': book_data})
+
+
+# books/views.py
+
+def author_detail(request, author_name):
+    api_data = get_author_info(author_name)
+
+    # Объединяем данные
+    context = {
+        'author': {
+            'name': author_name,
+            'photo': api_data.get('photo'),
+            'bio': api_data.get('bio'),
+            'birth_date': api_data.get('birth_date'),
+            'death_date': api_data.get('death_date'),
+            'books_count': api_data.get('books_count', 0),
+            'first_publication': api_data.get('first_publication')
+        }
+    }
+
+    return render(request, 'author_detail_test.html', context)

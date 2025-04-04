@@ -1,0 +1,38 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="search-container">
+    <h1>Поиск книг</h1>
+    <input type="text" id="book-search" placeholder="Введите название книги...">
+    <div id="search-results"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+<script>
+$(function() {
+    $("#book-search").autocomplete({
+        source: function(request, response) {
+            $.getJSON("{% url 'autocomplete' %}", {
+                term: request.term
+            }, function(data) {
+                response($.map(data, function(item) {
+                    return {
+                        label: item.text,
+                        value: item.text,
+                        id: item.id
+                    };
+                }));
+            });
+        },
+        minLength: 2,
+        select: function(event, ui) {
+            // Перенаправляем на страницу с деталями книги
+            window.location.href = "{% url 'book_detail' 'BOOK_ID' %}".replace('BOOK_ID', ui.item.id);
+        }
+    });
+});
+</script>
+{% endblock %}

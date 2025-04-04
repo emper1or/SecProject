@@ -1,0 +1,79 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="book-detail">
+    {% if book.cover %}
+    <div class="book-cover">
+        <img src="{{ book.cover }}" alt="Обложка книги">
+    </div>
+    {% endif %}
+
+    <div class="book-info">
+        <h1>{{ book.title }}</h1>
+
+        <div class="authors">
+            <strong>Автор{% if book.authors|length > 1 %}ы{% endif %}:</strong>
+            {% for author in book.authors %}
+                <a href="{% url 'author_detail' author %}" class="author-link">
+                    {{ author }}
+                </a>{% if not forloop.last %}, {% endif %}
+            {% empty %}
+                <span>Автор неизвестен</span>
+            {% endfor %}
+        </div>
+
+        <div class="meta">
+            {% if book.published_date %}<span>Год: {{ book.published_date }}</span>{% endif %}
+            {% if book.publisher %}<span>Издатель: {{ book.publisher }}</span>{% endif %}
+            {% if book.page_count %}<span>Страниц: {{ book.page_count }}</span>{% endif %}
+            {% if book.categories %}<span>Жанр: {{ book.categories }}</span>{% endif %}
+        </div>
+
+        {% if book.description %}
+        <div class="description">
+            <h3>Описание</h3>
+            <p>{{ book.description }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.book-detail {
+    display: flex;
+    gap: 30px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+.book-cover img {
+    max-height: 400px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.book-info {
+    flex: 1;
+}
+.authors {
+    margin: 15px 0;
+    font-size: 1.1em;
+}
+.author-link {
+    color: #1a73e8;
+    text-decoration: none;
+}
+.author-link:hover {
+    text-decoration: underline;
+}
+.meta {
+    margin: 20px 0;
+    color: #666;
+}
+.meta span {
+    display: block;
+    margin-bottom: 5px;
+}
+.description {
+    margin-top: 30px;
+    line-height: 1.6;
+}
+</style>
+{% endblock %}
