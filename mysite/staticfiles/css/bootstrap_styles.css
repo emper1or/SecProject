@@ -10,6 +10,7 @@
  * Copyright 2011-2022 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
+
 :root {
   --bs-blue: #0d6efd;
   --bs-indigo: #6610f2;
@@ -61,7 +62,7 @@
   --bs-body-font-size: 1rem;
   --bs-body-font-weight: 400;
   --bs-body-line-height: 1.5;
-  --bs-body-color: #ff6a00;
+  --bs-body-color: #00A1DB;
   --bs-body-bg: #fff;
   --bs-border-width: 1px;
   --bs-border-style: solid;
@@ -99,7 +100,7 @@ body {
   line-height: var(--bs-body-line-height);
   color: var(--bs-body-color);
   text-align: var(--bs-body-text-align);
-  background: linear-gradient(135deg, #87CEFA, #4682B4);
+  background: linear-gradient(135deg, rgba(174, 239, 255, 0.8), rgba(110, 198, 233, 0.8));
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
@@ -116,6 +117,7 @@ h6, .h6, h5, .h5, h4, .h4, h3, .h3, h2, .h2, h1, .h1 {
   margin-top: 0;
   margin-bottom: 0.5rem;
   font-family: "Catamaran", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-color: #00000;
   font-weight: 800;
   line-height: 1.2;
 }
@@ -1741,14 +1743,14 @@ progress {
 .table {
   --bs-table-color: var(--bs-body-color);
   --bs-table-bg: transparent;
-  --bs-table-border-color: var(--bs-border-color);
+  --bs-table-border-color: rgba(0, 0, 0, 1.0);
   --bs-table-accent-bg: transparent;
   --bs-table-striped-color: var(--bs-body-color);
   --bs-table-striped-bg: rgba(0, 0, 0, 0.05);
-  --bs-table-active-color: var(--bs-body-color);
+  --bs-table-active-color: var(#ffffff);
   --bs-table-active-bg: rgba(0, 0, 0, 0.1);
-  --bs-table-hover-color: var(--bs-body-color);
-  --bs-table-hover-bg: rgba(0, 0, 0, 0.075);
+  --bs-table-hover-color: var(#ffffff);
+  --bs-table-hover-bg: rgba(0, 161, 219, 0.8);
   width: 100%;
   margin-bottom: 1rem;
   color: var(--bs-table-color);
@@ -1757,7 +1759,7 @@ progress {
 }
 .table > :not(caption) > * > * {
   padding: 0.5rem 0.5rem;
-  background-color: var(--bs-table-bg);
+  background-color: rgba(0, 161, 219, 0.8);
   border-bottom-width: 1px;
   box-shadow: inset 0 0 0 9999px var(--bs-table-accent-bg);
 }
@@ -1823,7 +1825,7 @@ progress {
   --bs-table-active-bg: #e3b9cd;
   --bs-table-active-color: #000;
   --bs-table-hover-bg: #e9bfd3;
-  --bs-table-hover-color: #000;
+  --bs-table-hover-color: #00A1DB;
   color: var(--bs-table-color);
   border-color: var(--bs-table-border-color);
 }
@@ -1837,7 +1839,7 @@ progress {
   --bs-table-active-bg: #e6cbb8;
   --bs-table-active-color: #000;
   --bs-table-hover-bg: #ecd0bd;
-  --bs-table-hover-color: #000;
+  --bs-table-hover-color: #00A1DB;
   color: var(--bs-table-color);
   border-color: var(--bs-table-border-color);
 }
@@ -1851,7 +1853,7 @@ progress {
   --bs-table-active-bg: #bcd0c7;
   --bs-table-active-color: #000;
   --bs-table-hover-bg: #c1d6cc;
-  --bs-table-hover-color: #000;
+  --bs-table-hover-color: #00A1DB;
   color: var(--bs-table-color);
   border-color: var(--bs-table-border-color);
 }
@@ -1865,7 +1867,7 @@ progress {
   --bs-table-active-bg: #badce3;
   --bs-table-active-color: #000;
   --bs-table-hover-bg: #bfe2e9;
-  --bs-table-hover-color: #000;
+  --bs-table-hover-color: #00A1DB;
   color: var(--bs-table-color);
   border-color: var(--bs-table-border-color);
 }
@@ -1879,7 +1881,7 @@ progress {
   --bs-table-active-bg: #e6dbb9;
   --bs-table-active-color: #000;
   --bs-table-hover-bg: #ece1be;
-  --bs-table-hover-color: #000;
+  --bs-table-hover-color: #00A1DB;
   color: var(--bs-table-color);
   border-color: var(--bs-table-border-color);
 }
@@ -1893,7 +1895,7 @@ progress {
   --bs-table-active-bg: #dfc2c4;
   --bs-table-active-color: #000;
   --bs-table-hover-bg: #e5c7ca;
-  --bs-table-hover-color: #000;
+  --bs-table-hover-color: #00A1DB;
   color: var(--bs-table-color);
   border-color: var(--bs-table-border-color);
 }
@@ -1907,7 +1909,7 @@ progress {
   --bs-table-active-bg: #dfe0e1;
   --bs-table-active-color: #000;
   --bs-table-hover-bg: #e5e6e7;
-  --bs-table-hover-color: #000;
+  --bs-table-hover-color: #00A1DB;
   color: var(--bs-table-color);
   border-color: var(--bs-table-border-color);
 }
@@ -1921,7 +1923,7 @@ progress {
   --bs-table-active-bg: #373b3e;
   --bs-table-active-color: #fff;
   --bs-table-hover-bg: #323539;
-  --bs-table-hover-color: #fff;
+  --bs-table-hover-color: #00A1DB;
   color: var(--bs-table-color);
   border-color: var(--bs-table-border-color);
 }
@@ -7660,7 +7662,7 @@ textarea.form-control-lg {
 }
 
 .mb-3 {
-  margin-bottom: 1rem !important;
+  margin-bottom: 0.5rem !important;
 }
 
 .mb-4 {
@@ -8081,7 +8083,7 @@ textarea.form-control-lg {
 
 .text-white {
   --bs-text-opacity: 1;
-  color: rgba(var(--bs-white-rgb), var(--bs-text-opacity)) !important;
+  color: rgba(0 0 0 0) !important;
 }
 
 .text-body {
@@ -8101,7 +8103,7 @@ textarea.form-control-lg {
 
 .text-white-50 {
   --bs-text-opacity: 1;
-  color: rgba(255, 255, 255, 0.5) !important;
+  color: rgba(0, 161, 219, 1) !important;
 }
 
 .text-reset {
@@ -10838,9 +10840,9 @@ html {
 }
 
 .navbar-custom {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  background-color: rgba(0, 0, 0, 0.7);
+  padding-top: 0rem;
+  padding-bottom: 0rem;
+  background-color: rgba(0, 161, 219, 1);
 }
 .navbar-custom .navbar-brand {
   text-transform: uppercase;
@@ -10858,9 +10860,9 @@ html {
 header.masthead {
   position: relative;
   overflow: hidden;
-  padding-top: calc(7rem + 72px);
-  padding-bottom: 7rem;
-  background: linear-gradient(0deg, #ff6a00 0%, #ee0979 100%);
+  padding-top: calc(1rem + 2px);
+  padding-bottom: 2rem;
+  background-color: #ffffff;
   background-repeat: no-repeat;
   background-position: center center;
   background-attachment: scroll;
@@ -10880,7 +10882,7 @@ header.masthead .bg-circle {
   z-index: 0;
   position: absolute;
   border-radius: 100%;
-  background: linear-gradient(0deg, #ee0979 0%, #ff6a00 100%);
+  background: linear-gradient(0deg, #AEEFFF 0%, #6EC6E9 100%);
 }
 header.masthead .bg-circle-1 {
   height: 90rem;
@@ -10909,8 +10911,8 @@ header.masthead .bg-circle-4 {
 
 @media (min-width: 992px) {
   header.masthead {
-    padding-top: calc(10rem + 55px);
-    padding-bottom: 10rem;
+    padding-top: calc(3rem + 55px);
+    padding-bottom: 7rem;
   }
   header.masthead .masthead-content .masthead-heading {
     font-size: 6rem;
@@ -10918,16 +10920,5 @@ header.masthead .bg-circle-4 {
   header.masthead .masthead-content .masthead-subheading {
     font-size: 4rem;
   }
-}
-
-
-#togglePassword i {
-    color: #000000; /* Черный цвет иконки */
-    font-size: 1.2rem; /* Размер иконки */
-    transition: color 0.3s ease; /* Плавное изменение цвета */
-}
-
-#togglePassword:hover i {
-    color: #007bff; /* Цвет иконки при наведении */
 }
 
