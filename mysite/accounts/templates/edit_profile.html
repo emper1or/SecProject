@@ -11,34 +11,46 @@
             </div>
 
             <!-- Форма редактирования профиля -->
-            <form method="post" class="needs-validation"  novalidate>
+            <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                 {% csrf_token %}
+                
+                <!-- Current Avatar -->
+                <div class="text-center mb-4">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="Текущий аватар" class="rounded-circle mb-2" width="100" height="100">
+                    {% else %}
+                        <img src="{% static 'images/default_avatar.png' %}" alt="Аватар по умолчанию" class="rounded-circle mb-2" width="100" height="100">
+                    {% endif %}
+                </div>
+                
                 {% for field in form %}
-                    <div class="row">
+                    <div class="mb-3">
                         <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                        <input type="{{ field.field.widget.input_type }}" class="form-control" id="{{ field.id_for_label }}" name="{{ field.name }}" value="{{ field.value }}">
-                    </div>
-                    <div class="mb-3">
-                        {% if field.help_text %}
-                        <small class="form-text text-white">{{ field.help_text }}</small>
+                        {% if field.name == 'avatar' %}
+                            <input type="file" class="form-control" id="{{ field.id_for_label }}" name="{{ field.name }}">
+                        {% else %}
+                            <input type="{{ field.field.widget.input_type }}" 
+                                   class="form-control" 
+                                   id="{{ field.id_for_label }}" 
+                                   name="{{ field.name }}" 
+                                   value="{{ field.value|default_if_none:'' }}">
                         {% endif %}
-                    </div>
-                    <div class="mb-3">
+                        
+                        {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                        
                         {% for error in field.errors %}
-                            <small class="alert alert-danger" role="alert">{{ error }}</small>
+                            <div class="alert alert-danger mt-2" role="alert">{{ error }}</div>
                         {% endfor %}
                     </div>
-
                 {% endfor %}
+                
                 <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                    <a href="{% url 'profile' %}" class="btn btn-secondary">Отмена</a>
                 </div>
             </form>
-
-            <!-- Кнопка "Назад" -->
-            <div class="text-center mt-4">
-                <a href="{% url 'profile' %}"  class="btn btn-primary">Назад</a>
-            </div>
         </div>
     </div>
 </div>

@@ -3,6 +3,7 @@ from accounts.models import CustomUser
 
 
 class Developer(models.Model):
+    objects = None
     name = models.CharField(max_length=100, verbose_name="Название разработчика")
     bio = models.TextField(verbose_name="Описание разработчика", blank=True, null=True)
 

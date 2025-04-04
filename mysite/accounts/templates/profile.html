@@ -11,11 +11,17 @@
             <h1 class="text-primary" style="color: #00A1DB; font-weight: bold;">Профиль пользователя</h1>
         </div>
 
+        <div class="profile-avatar mb-4">
+            {% if user.avatar %}
+                <img src="{{ user.avatar.url }}" alt="Аватар" class="rounded-circle" width="150" height="150">
+            {% else %}
+                <img src="{% static 'images/default_avatar.png' %}" alt="Аватар" class="rounded-circle" width="150" height="150">
+            {% endif %}
+        </div>
+
         <div class="profile-info text-start">
             <p><strong>Имя пользователя:</strong> <span class="text-muted">{{ user.username }}</span></p>
             <p><strong>Email:</strong> <span class="text-muted">{{ user.email }}</span></p>
-            <p><strong>Имя:</strong> <span class="text-muted">{{ user.first_name }}</span></p>
-            <p><strong>Фамилия:</strong> <span class="text-muted">{{ user.last_name }}</span></p>
             <p><strong>Дата регистрации:</strong> <span class="text-muted">{{ user.date_joined|date:"d.m.Y" }}</span></p>
         </div>
 

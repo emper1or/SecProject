@@ -72,27 +72,24 @@
             {% csrf_token %}
             <fieldset class="mb-4">
                 <legend class="fs-4">Информация об игре</legend>
-                <div class="mb-3">
-                    <label for="id_title" class="form-label">Название игры:</label>
-                    <input type="text" name="title" id="id_title" class="form-control" required maxlength="200">
-                </div>
-                <div class="mb-3">
-                    <label for="id_description" class="form-label">Описание игры:</label>
-                    <textarea name="description" id="id_description" class="form-control"></textarea>
-                </div>
-                <div class="mb-3">
-                    <label for="id_developer" class="form-label">Разработчик:</label>
-                    <select name="developer" id="id_developer" class="form-select" required>
-                        <option value="">Выберите разработчика</option>
-                        {% for developer in developers %}
-                            <option value="{{ developer.id }}">{{ developer.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+                {% for field in game_form %}
+                    {% if field.name != "rating" %}
+                        <div class="mb-3 form-group">
+                             <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="invalid-feedback">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
                 <p>
                     <button type="submit" name="add_developer" class="btn btn-secondary">Добавить нового разработчика</button>
                 </p>
-            </fieldset>
+        </fieldset>
 
             <fieldset class="mb-4">
                 <legend class="fs-4">Рейтинг игры</legend>

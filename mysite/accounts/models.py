@@ -3,10 +3,20 @@ from django.core.validators import validate_email
 from django.db import models
 import random
 
+def user_avatar_path(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/user_<id>/avatar/<filename>
+    return f'user_{instance.id}/avatar/{filename}'
+
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True, validators=[validate_email])
     verification_code = models.CharField(max_length=6, blank=True, null=True)
     verification_attempts = models.IntegerField(default=0)
+    avatar = models.ImageField(
+        upload_to='avatars/',
+        blank=True,
+        null=True,
+        verbose_name='Аватар'
+    )
 
     groups = models.ManyToManyField(
         'auth.Group',
