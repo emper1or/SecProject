@@ -37,10 +37,24 @@ def get_book_details(book_id):
 
     response = requests.get(f"https://www.googleapis.com/books/v1/volumes/{book_id}")
     data = response.json()
-
     volume_info = data.get('volumeInfo', {})
-    authors = volume_info.get('authors', [])
+    return get_info_by_volume_info(volume_info)
 
+
+def get_book_details_isbn(isbn):
+    """Получаем детали книги по ISBN"""
+    response = requests.get(f'https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}')
+    data = response.json()
+    if data.get('items'):
+        volume_info = data["items"][0].get('volumeInfo', {})
+        return get_info_by_volume_info(volume_info)
+    else:
+        return None
+
+
+def get_info_by_volume_info(volume_info):
+    """Получаем детали книги по JSON (для поиска как по ISBN, так и по названию)"""
+    authors = volume_info.get('authors', [])
     book_data = {
         'title': volume_info.get('title', ''),
         'authors': authors,
@@ -50,11 +64,9 @@ def get_book_details(book_id):
         'cover': volume_info.get('imageLinks', {}).get('thumbnail', ''),
         'publisher': volume_info.get('publisher', ''),
         'page_count': volume_info.get('pageCount', ''),
-        'categories':  volume_info.get('categories', ''),
+        'categories': volume_info.get('categories', ''),
         'first_author': authors[0] if authors else None  # Для ссылки на первого автора
     }
-
-
     return book_data
 
 

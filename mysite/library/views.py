@@ -1,12 +1,11 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .utils import get_book_suggestions, get_book_details, get_author_info
+from .utils import get_book_suggestions, get_book_details, get_author_info, get_book_details_isbn
 from django.http import JsonResponse
 
 from .forms import BookForm, BookCoverForm
 from .models import Author, Book, BookCover
-
 
 
 @login_required
@@ -153,6 +152,15 @@ def book_detail(request, book_id):
     # Получаем полные данные о книге
     book_data = get_book_details(book_id)
     return render(request, 'book_details_test.html', {'book': book_data})
+
+
+def book_search_isbn(request):
+    if request.method == 'POST':
+        isbn = request.POST.get('isbn')
+        book_data = get_book_details_isbn(isbn)
+        return render(request, 'book_details_test.html', {'book': book_data})
+    # Получаем полные данные о книге
+    return render(request, 'search_isbn.html')
 
 
 # books/views.py
