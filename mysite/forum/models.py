@@ -29,23 +29,19 @@ class Message(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(default=timezone.now)
 
-    # Поля для лайков/дизлайков
-    likes = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name='liked_messages',
-        blank=True
-    )
-    dislikes = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name='disliked_messages',
-        blank=True
-    )
-
     class Meta:
         ordering = ['created_at']
 
     def __str__(self):
         return f"{self.author.username}: {self.content[:50]}..."
+
+    def get_user_vote(self, user):
+        if user.is_authenticated:
+            vote = self.votes.filter(user=user).first()
+            if vote:
+                return 'like' if vote.value > 0 else 'dislike'
+        return None
+
 
 class Vote(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
