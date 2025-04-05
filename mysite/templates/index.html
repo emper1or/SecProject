@@ -16,29 +16,42 @@
         <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i" rel="stylesheet" />
         <!-- Core theme CSS (includes Bootstrap)-->
-        <link href="{% static 'css/bootstrap_styles.css' %}" rel="stylesheet" />
+        <link href="{% static 'css/bootstrap_styles_optimized_clean.css' %}" rel="stylesheet" />
     </head>
     <body id="page-top">
         <!-- Navigation-->
-        <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
+       <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
     <div class="container px-5">
         <!-- Картинка в качестве кнопки -->
         <a href="{% url 'home' %}">
-            <img src="https://psv4.userapi.com/s/v1/d/GFHezbbdXgdlMrTngqOMPM-5QNw8ZzCNXz2-s8kchmtoRsI-jDd__tAjfhRnzP3d9DGgowP6d7OkYzgiC7_tsOTJx2_FeHmBVudD7LM5reAgUKT5J73fBQ/Frame_1_2_-Photoroom_3.png" alt="Главная страница" style="max-width: 170px; height: auto;">
+            <img src="https://psv4.userapi.com/s/v1/d/4M2S7KiAV7J4dHvXNDbNC4zj3dSDAOh9bWf4esjNtdBmVaoQcpqlCHaCNfNG-BTIjcxcByUvw6nDGFTPAqmZT443q039fNq1LIif8woJVZKqOhcYU8GNSw/Frame_1_5_-Photoroom.png"
+                 alt="Главная страница"
+                 style="max-width: 170px; height: auto;">
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         {% if user.is_authenticated %}
         <div class="collapse navbar-collapse" id="navbarResponsive">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="{% url 'book_search_isbn' %}">Поиск книг по Штрих Коду</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'book_search' %}">Поиск книг</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Библиотека</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Профиль</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Выйти</a></li>
-            </ul>
-        </div>
+    <ul class="navbar-nav ms-auto">
+
+        <div class="search-container">
+    <input type="text" id="book-search" placeholder="Введите название книги...">
+    <button id="search-icon" class="search-button">🔍</button>
+</div>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'dashboard' %}">Библиотека</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'profile' %}">Профиль</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'logout' %}">Выйти</a>
+        </li>
+        <!-- Кнопка поиска -->
+
+    </ul>
+</div>
         {% else %}
         <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav ms-auto">
@@ -46,6 +59,12 @@
                 <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Войти</a></li>
             </ul>
         </div>
+
+
+        <div id="search-container" class="search-container hidden">
+    <input type="text" id="book-search" placeholder="Введите название книги...">
+    <div id="search-results"></div>
+</div>
         {% endif %}
     </div>
 </nav>
@@ -77,5 +96,51 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
         <!-- Core theme JS-->
         <script src="{% static 'js/script.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+<script>
+$(function() {
+    $("#book-search").autocomplete({
+        appendTo: "body", // Переносит список автозаполнения в <body>, чтобы он не был ограничен родителем
+        position: { my: "left top", at: "left bottom+5", collision: "none" }, // Точное позиционирование под полем поиска
+        source: function(request, response) {
+            $.getJSON("{% url 'autocomplete' %}", {
+                term: request.term
+            }, function(data) {
+                response($.map(data, function(item) {
+                    return {
+                        label: item.text,
+                        value: item.text,
+                        id: item.id
+                    };
+                }));
+            });
+        },
+        minLength: 2,
+        select: function(event, ui) {
+            // Перенаправляем на страницу с деталями книги
+            window.location.href = "{% url 'book_detail' 'BOOK_ID' %}".replace('BOOK_ID', ui.item.id);
+        },
+        open: function() {
+            $(".ui-autocomplete").css({
+                "position": "fixed", // Делаем список фиксированным
+                "top": $("#book-search").offset().top + $("#book-search").outerHeight() + "px", // Подгоняем под поле ввода
+                "left": $("#book-search").offset().left + "px",
+                "width": $("#book-search").outerWidth() + "px", // Делаем ширину равной полю ввода
+                "background": "rgba(255, 255, 255, 0.95)",
+                "border": "1px solid rgba(200, 200, 200, 0.5)",
+                "border-radius": "10px",
+                "box-shadow": "0px 4px 10px rgba(0, 0, 0, 0.3)",
+                "z-index": "9999" // Поднимаем выше всех элементов
+            });
+        }
+    });
+});
+
+</script>
+
+
     </body>
 </html>
