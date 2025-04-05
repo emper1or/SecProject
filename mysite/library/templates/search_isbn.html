@@ -1,0 +1,9 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<form method="POST" action="{% url 'book_search_isbn' %}">
+    {% csrf_token %}
+    <input type="text" name="isbn" placeholder="Введите ISBN" required>
+    <button type="submit">Найти</button>
+</form>
+{% endblock %}
