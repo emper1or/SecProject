@@ -1,0 +1,34 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="forum-container">
+            <div class="forum-nav d-flex justify-content-between align-items-center">
+                <h1 class="forum-header">Новая тема в "{{ category.name }}"</h1>
+                <a href="{% url 'category_topics' category.id %}" class="forum-btn forum-btn-outline">
+                    <i class="fas fa-arrow-left me-1"></i> Назад
+                </a>
+            </div>
+
+            <div class="forum-form mt-4">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">Название темы</label>
+                        {{ form.title }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">Описание</label>
+                        {{ form.description }}
+                    </div>
+                    <button type="submit" class="forum-btn forum-btn-primary">
+                        <i class="fas fa-check me-1"></i> Создать тему
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

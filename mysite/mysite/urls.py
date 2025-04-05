@@ -9,6 +9,7 @@ urlpatterns = [
     path('lib/', include('library.urls')),
     path('', include('accounts.urls')),
     path('games/', include('games.urls')),
+    path('forum/', include('forum.urls')),
 
 ]
 

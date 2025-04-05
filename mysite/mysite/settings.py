@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'forum',
     'games',
     'library',
     'accounts',
@@ -57,8 +58,9 @@ MIDDLEWARE = [
     ]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-
-
+AUTH_USER_MODEL = 'accounts.CustomUser'
+CSRF_COOKIE_HTTPONLY = False  # Должно быть False для AJAX
+CSRF_USE_SESSIONS = False
 ROOT_URLCONF = 'mysite.urls'
 
 TEMPLATES = [

@@ -1,0 +1,88 @@
+{% load static %}
+
+<div class="message-card card mb-3" id="message-{{ message.id }}">
+    <div class="card-body">
+        <!-- Заголовок сообщения -->
+        <div class="d-flex justify-content-between mb-2">
+            <div class="d-flex align-items-center">
+                <img src="{% if message.author.profile.avatar %}{{ message.author.profile.avatar.url }}{% else %}{% static 'assets/default-avatar.png' %}{% endif %}"
+                     class="rounded-circle me-2" width="40" height="40"
+                     alt="Аватар {{ message.author.username }}">
+                <strong>{{ message.author.username }}</strong>
+            </div>
+            <small class="text-muted">{{ message.created_at|date:"d.m.Y H:i" }}</small>
+        </div>
+
+        <!-- Текст сообщения -->
+        <p class="card-text mb-3">{{ message.content }}</p>
+
+        <!-- Кнопки действий -->
+        <div class="message-actions d-flex align-items-center gap-2">
+            <!-- Форма голосования -->
+            <form class="vote-form" data-message-id="{{ message.id }}">
+                {% csrf_token %}
+                <!-- Кнопка лайка -->
+                <button type="button"
+                        class="btn btn-sm {% if request.user in message.likes.all %}btn-success{% else %}btn-outline-success{% endif %} like-btn"
+                        {% if not user.is_authenticated %}disabled{% endif %}>
+                    <i class="fas fa-thumbs-up"></i>
+                    <span class="like-count">{{ message.likes.count }}</span>
+                </button>
+
+                <!-- Кнопка дизлайка -->
+                <button type="button"
+                        class="btn btn-sm {% if request.user in message.dislikes.all %}btn-danger{% else %}btn-outline-danger{% endif %} dislike-btn"
+                        {% if not user.is_authenticated %}disabled{% endif %}>
+                    <i class="fas fa-thumbs-down"></i>
+                    <span class="dislike-count">{{ message.dislikes.count }}</span>
+                </button>
+            </form>
+
+            <!-- Кнопка ответа -->
+            <button class="btn btn-sm btn-outline-primary reply-btn"
+                    data-message-id="{{ message.id }}"
+                    data-author="{{ message.author.username }}"
+                    data-content="{{ message.content|truncatechars:50 }}"
+                    {% if not user.is_authenticated %}disabled{% endif %}>
+                <i class="fas fa-reply"></i> Ответить
+            </button>
+        </div>
+
+        <!-- Форма ответа (скрыта по умолчанию) -->
+        <div class="reply-form mt-3" id="reply-form-{{ message.id }}" style="display: none;">
+            <form method="post" action="{% url 'add_message' message.topic.id %}" class="ajax-reply-form">
+                {% csrf_token %}
+                <input type="hidden" name="parent_id" value="{{ message.id }}">
+
+                <!-- Цитата сообщения -->
+                <div class="alert alert-light border mb-2 p-2">
+                    <small>
+                        <strong>Ответ для @{{ message.author.username }}:</strong>
+                        <span>{{ message.content|truncatechars:100 }}</span>
+                    </small>
+                </div>
+
+                <!-- Поле для ответа -->
+                <div class="mb-2">
+                    <textarea name="content" class="form-control" rows="3" required
+                              placeholder="Ваш ответ..."></textarea>
+                </div>
+
+                <!-- Кнопки формы -->
+                <div>
+                    <button type="submit" class="btn btn-primary btn-sm me-2">Отправить</button>
+                    <button type="button" class="btn btn-secondary btn-sm cancel-reply">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Блок ответов (если они есть) -->
+{% if message.replies.all %}
+<div class="replies ms-4 mt-2">
+    {% for reply in message.replies.all %}
+        {% include 'forum/message.html' with message=reply %}
+    {% endfor %}
+</div>
+{% endif %}

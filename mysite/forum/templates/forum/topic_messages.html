@@ -1,0 +1,183 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{{ topic.title }}</h1>
+        <a href="{% url 'category_topics' topic.category.id %}" class="btn btn-outline-secondary">
+            Назад к категории
+        </a>
+    </div>
+
+    {% if topic.description %}
+    <div class="mb-4">
+        <p class="text-muted">{{ topic.description }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Контейнер для сообщений форума -->
+    <div class="forum-messages mb-5" id="messages-container">
+        {% for forum_message in forum_messages %}
+            {% include 'forum/message.html' with message=forum_message %}
+        {% empty %}
+            <div class="alert alert-info">Пока нет сообщений в этой теме. Будьте первым!</div>
+        {% endfor %}
+    </div>
+
+    <!-- Форма нового сообщения -->
+    {% if user.is_authenticated %}
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Новое сообщение</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'add_message' topic.id %}" id="main-message-form">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <textarea name="content" class="form-control" rows="3" required
+                              placeholder="Напишите ваше сообщение..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Отправить</button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <a href="{% url 'login' %}?next={% url 'topic_messages' topic.id %}">Войдите</a>, чтобы оставлять сообщения
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Функция для получения CSRF токена
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Обработчик лайков/дизлайков
+document.addEventListener('click', async function(e) {
+    if (e.target.closest('.like-btn, .dislike-btn')) {
+        const btn = e.target.closest('.like-btn, .dislike-btn');
+        const form = btn.closest('.vote-form');
+        const messageId = form.dataset.messageId;
+        const voteType = btn.classList.contains('like-btn') ? 'like' : 'dislike';
+        const csrfToken = getCookie('csrftoken');
+
+        try {
+            const response = await fetch(`/forum/message/${messageId}/vote/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    vote_type: voteType
+                })
+            });
+
+            if (!response.ok) throw new Error('Ошибка сети');
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Обновляем счетчики
+                form.querySelector('.like-count').textContent = data.likes;
+                form.querySelector('.dislike-count').textContent = data.dislikes;
+
+                // Обновляем стили кнопок
+                const likeBtn = form.querySelector('.like-btn');
+                const dislikeBtn = form.querySelector('.dislike-btn');
+
+                likeBtn.classList.toggle('btn-success', data.user_vote === 'like');
+                likeBtn.classList.toggle('btn-outline-success', data.user_vote !== 'like');
+
+                dislikeBtn.classList.toggle('btn-danger', data.user_vote === 'dislike');
+                dislikeBtn.classList.toggle('btn-outline-danger', data.user_vote !== 'dislike');
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при голосовании');
+        }
+    }
+});
+
+// Обработчик ответов на сообщения
+document.addEventListener('click', function(e) {
+    // Показать/скрыть форму ответа
+    if (e.target.closest('.reply-btn')) {
+        const btn = e.target.closest('.reply-btn');
+        const messageId = btn.dataset.messageId;
+        const replyForm = document.getElementById(`reply-form-${messageId}`);
+
+        // Скрываем все другие формы ответов
+        document.querySelectorAll('.reply-form').forEach(form => {
+            if (form.id !== `reply-form-${messageId}`) form.style.display = 'none';
+        });
+
+        // Показываем/скрываем текущую форму
+        replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Отмена ответа
+    if (e.target.closest('.cancel-reply')) {
+        e.target.closest('.reply-form').style.display = 'none';
+    }
+});
+
+// Отправка формы ответа
+document.querySelectorAll('.ajax-reply-form').forEach(form => {
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const messageId = formData.get('parent_id');
+        const csrfToken = getCookie('csrftoken');
+
+        try {
+            const response = await fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken
+                }
+            });
+
+            if (!response.ok) throw new Error('Ошибка сети');
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Добавляем ответ в DOM
+                let repliesContainer = document.querySelector(`#message-${messageId} .replies`);
+                if (!repliesContainer) {
+                    const messageDiv = document.getElementById(`message-${messageId}`);
+                    repliesContainer = document.createElement('div');
+                    repliesContainer.className = 'replies ms-4 mt-2';
+                    messageDiv.insertAdjacentElement('afterend', repliesContainer);
+                }
+                repliesContainer.insertAdjacentHTML('beforeend', data.html);
+
+                // Сбрасываем и скрываем форму
+                this.reset();
+                this.closest('.reply-form').style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при отправке ответа');
+        }
+    });
+});
+</script>
+{% endblock %}
