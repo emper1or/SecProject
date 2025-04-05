@@ -8,9 +8,6 @@ logger = logging.getLogger(__name__)
 
 def get_book_suggestions(query):
     """Получаем подсказки из Google Books API"""
-    cache_key = f"books_suggestions:{query}"
-    if cache.get(cache_key):
-        return cache.get(cache_key)
 
     params = {
         "q": query,
@@ -32,22 +29,32 @@ def get_book_suggestions(query):
             'text': f"{title} - {authors}"
         })
 
-    cache.set(cache_key, suggestions, 60 * 60)
     return suggestions
 
 
 def get_book_details(book_id):
     """Получаем детали книги по ID"""
-    cache_key = f"book_details:{book_id}"
-    if cache.get(cache_key):
-        return cache.get(cache_key)
 
     response = requests.get(f"https://www.googleapis.com/books/v1/volumes/{book_id}")
     data = response.json()
-
     volume_info = data.get('volumeInfo', {})
-    authors = volume_info.get('authors', [])
+    return get_info_by_volume_info(volume_info)
 
+
+def get_book_details_isbn(isbn):
+    """Получаем детали книги по ISBN"""
+    response = requests.get(f'https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}')
+    data = response.json()
+    if data.get('items'):
+        volume_info = data["items"][0].get('volumeInfo', {})
+        return get_info_by_volume_info(volume_info)
+    else:
+        return None
+
+
+def get_info_by_volume_info(volume_info):
+    """Получаем детали книги по JSON (для поиска как по ISBN, так и по названию)"""
+    authors = volume_info.get('authors', [])
     book_data = {
         'title': volume_info.get('title', ''),
         'authors': authors,
@@ -57,19 +64,14 @@ def get_book_details(book_id):
         'cover': volume_info.get('imageLinks', {}).get('thumbnail', ''),
         'publisher': volume_info.get('publisher', ''),
         'page_count': volume_info.get('pageCount', ''),
-        'categories':  volume_info.get('categories', ''),
+        'categories': volume_info.get('categories', ''),
         'first_author': authors[0] if authors else None  # Для ссылки на первого автора
     }
-
-    cache.set(cache_key, book_data, 60 * 60 * 24)
     return book_data
 
 
 def get_author_info(author_name):
     """Получаем информацию об авторе из различных API"""
-    cache_key = f"author_info:{author_name.lower()}"
-    if cached := cache.get(cache_key):
-        return cached
 
     # 1. Пробуем Wikipedia API (для биографии и фото)
     wiki_data = get_wikipedia_author_info(author_name)
@@ -90,7 +92,6 @@ def get_author_info(author_name):
         'first_publication': gb_data.get('first_publication')
     }
 
-    cache.set(cache_key, author_data, 60 * 60 * 24)  # Кэш на 1 день
     return author_data
 
 
