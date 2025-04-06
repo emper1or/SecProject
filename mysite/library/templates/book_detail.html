@@ -9,9 +9,9 @@
         <h2 class="text-center text-primary mb-4">{{ book.title }}</h2>
 
         <div class="row">
-            <div class="col-md-4 d-flex justify-content-center">
+               <div class="col-md-4 d-flex justify-content-center">
                 {% for cover in covers %}
-                    {% if cover.book == book %}
+                    {% if cover.book == book and cover.cover%}
                         <img src="{{ cover.cover.url }}" alt="Обложка книги {{ book.title }}" class="img-fluid rounded shadow" />
                     {% endif %}
                 {% endfor %}
