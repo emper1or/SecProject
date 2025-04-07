@@ -6,6 +6,10 @@ from django.utils import timezone
 class Category(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
+    order = models.PositiveIntegerField(default=0, db_index=True)
+
+    class Meta:
+        ordering = ['order']
 
     def __str__(self):
         return self.name

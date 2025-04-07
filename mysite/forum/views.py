@@ -1,5 +1,6 @@
 import json
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -7,19 +8,98 @@ from django.views.decorators.http import require_POST
 from django.template.loader import render_to_string
 from .models import Category, Topic, Message, Vote
 from .forms import TopicForm, MessageForm
+from django.db import models
+from django.db.models import Q
 
 
 def forum_home(request):
-    categories = Category.objects.all()
-    return render(request, 'forum/home.html', {'categories': categories})
+    search_query = request.GET.get('q', '')
+
+    if search_query:
+        categories = Category.objects.filter(
+            Q(name__icontains=search_query)
+        ).order_by('order')
+    else:
+        categories = Category.objects.all().order_by('order')
+
+    return render(request, 'forum/forum_home.html', {
+        'categories': categories,
+        'search_query': search_query
+    })
+
+@staff_member_required
+def create_category(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description', '')
+        # Устанавливаем порядок как последний
+        max_order = Category.objects.all().aggregate(models.Max('order'))['order__max'] or 0
+        Category.objects.create(name=name, description=description, order=max_order + 1)
+        return redirect('forum_home')
+    return redirect('forum_home')
+
+
+@staff_member_required
+def update_category(request):
+    if request.method == 'POST':
+        category_id = request.POST.get('category_id')
+        name = request.POST.get('name')
+        description = request.POST.get('description', '')
+        category = Category.objects.get(id=category_id)
+        category.name = name
+        category.description = description
+        category.save()
+        return redirect('forum_home')
+    return redirect('forum_home')
+
+
+@staff_member_required
+def delete_category(request, category_id):
+    category = Category.objects.get(id=category_id)
+    category.delete()
+    return redirect('forum_home')
+
+
+@staff_member_required
+def update_categories_order(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            order = data.get('order', [])
+
+            for index, category_id in enumerate(order, start=1):
+                Category.objects.filter(id=category_id).update(order=index)
+
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error'}, status=400)
+
+
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from .models import Category, Topic
+from .forms import TopicForm
 
 
 def category_topics(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     topics = category.topics.all()
+
+    # Поиск по темам
+    search_query = request.GET.get('q', '')
+    if search_query:
+        topics = topics.filter(Q(title__icontains=search_query) | Q(description__icontains=search_query))
+
+    # Фильтр "Ваши темы"
+    if request.GET.get('my_topics') and request.user.is_authenticated:
+        topics = topics.filter(author=request.user)
+
     return render(request, 'forum/category_topics.html', {
         'category': category,
-        'topics': topics
+        'topics': topics,
+        'search_query': search_query
     })
 
 
@@ -40,6 +120,14 @@ def create_topic(request, category_id):
         'form': form,
         'category': category
     })
+
+
+@login_required
+def delete_topic(request, topic_id):
+    topic = get_object_or_404(Topic, id=topic_id)
+    if request.user.is_superuser or request.user == topic.author:
+        topic.delete()
+    return redirect('category_topics', category_id=topic.category.id)
 
 
 def topic_messages(request, topic_id):

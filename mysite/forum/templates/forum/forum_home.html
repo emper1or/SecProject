@@ -1,0 +1,197 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Форум</h1>
+        {% if user.is_superuser %}
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
+                <i class="bi bi-plus-lg"></i> Создать категорию
+            </button>
+        {% endif %}
+    </div>
+
+
+    <!-- Компактная строка поиска -->
+    <div class="mb-4" style="max-width: 600px;">
+        <form method="get" action="{% url 'forum_home' %}" class="row g-2 align-items-center">
+            <div class="col-md-8">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" placeholder="Поиск по категории..."
+                           value="{{ request.GET.q }}">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i>
+                    </button>
+                    <a href="?q=" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-1"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Сообщение о ненайденной категории -->
+    {% if request.GET.q and not categories %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert" style="max-width: 600px;">
+        <div class="d-flex">
+            <div class="flex-shrink-0">
+                <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+            </div>
+            <div class="flex-grow-1 ms-3">
+                <h5 class="alert-heading">Категория не найдена!</h5>
+                <p>По запросу <strong>"{{ request.GET.q }}"</strong> ничего не найдено.</p>
+                <hr>
+                <p class="mb-0">Возможные причины:
+                    <ul>
+                        <li>Данной категории не существует</li>
+                        <li>Вы ввели название неправильно</li>
+                    </ul>
+                </p>
+                <p>Попробуйте изменить поисковый запрос.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Modal для создания категории -->
+    {% if user.is_superuser %}
+    <div class="modal fade" id="createCategoryModal" tabindex="-1" aria-labelledby="createCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createCategoryModalLabel">Создать новую категорию</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" action="{% url 'create_category' %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="categoryName" class="form-label">Название категории</label>
+                            <input type="text" class="form-control" id="categoryName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="categoryDescription" class="form-label">Описание</label>
+                            <textarea class="form-control" id="categoryDescription" name="description" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Создать</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row" id="categories-container">
+        {% for category in categories %}
+        <div class="col-md-4 mb-4 category-item" data-category-id="{{ category.id }}" draggable="true">
+            <div class="card h-100">
+                <div class="card-body">
+                    {% if user.is_superuser %}
+                    <div class="d-flex justify-content-end mb-2 gap-2">
+                        <button class="btn btn-primary btn-sm edit-category-btn"
+                                data-category-id="{{ category.id }}"
+                                data-category-name="{{ category.name }}"
+                                data-category-description="{{ category.description }}"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editCategoryModal">
+                            <i class="bi bi-pencil-fill"></i> Редактировать
+                        </button>
+                        <a href="{% url 'delete_category' category.id %}"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Вы уверены, что хотите удалить эту категорию?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+                    <h5 class="card-title">{{ category.name }}</h5>
+                    <p class="card-text">{{ category.description }}</p>
+                    <a href="{% url 'category_topics' category.id %}" class="btn btn-primary">
+                        <i class="bi bi-chat-left-text"></i> Перейти к темам
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Modal для редактирования категории -->
+    {% if user.is_superuser %}
+    <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCategoryModalLabel">Редактировать категорию</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" action="{% url 'update_category' %}">
+                    {% csrf_token %}
+                    <input type="hidden" id="editCategoryId" name="category_id">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="editCategoryName" class="form-label">Название категории</label>
+                            <input type="text" class="form-control" id="editCategoryName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCategoryDescription" class="form-label">Описание</label>
+                            <textarea class="form-control" id="editCategoryDescription" name="description" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if user.is_superuser %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+<script>
+// Drag and Drop для категорий
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('categories-container');
+
+    new Sortable(container, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        onEnd: function() {
+            const order = Array.from(document.querySelectorAll('.category-item')).map(el => el.getAttribute('data-category-id'));
+            fetch("{% url 'update_categories_order' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({order: order})
+            }).then(response => response.json())
+              .then(data => console.log('Order updated:', data));
+        }
+    });
+
+    // Заполнение формы редактирования
+    document.querySelectorAll('.edit-category-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('editCategoryId').value = this.getAttribute('data-category-id');
+            document.getElementById('editCategoryName').value = this.getAttribute('data-category-name');
+            document.getElementById('editCategoryDescription').value = this.getAttribute('data-category-description');
+        });
+    });
+});
+</script>
+
+<style>
+.sortable-ghost {
+    opacity: 0.5;
+    background: #c8ebfb;
+}
+.category-item {
+    cursor: move;
+}
+</style>
+{% endif %}
+{% endblock %}
