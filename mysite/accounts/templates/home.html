@@ -6,13 +6,20 @@
     <div class="blue-shape"></div>
     <div class="flex-grow-1 d-flex justify-content-center align-items-center text-center" style="margin-top: -250px;">
         <div>
-            <h1 class="display-3 mb-4">Добро пожаловать в библиотеку!</h1>
+            <h1 class="display-3 mb-4">Добро пожаловать в Memory Case!</h1>
             {% if user.is_authenticated %}
-                <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">Перейти в личный кабинет</a>
+                <div class="d-flex justify-content-center gap-3 mb-4">
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">Перейти в вашу библиотеку</a>
+                    <a href="{% url 'forum_home' %}" class="btn btn-success btn-lg">Перейти на форум</a>
+                </div>
             {% else %}
                 <p class="lead fs-4">Пожалуйста, войдите или зарегистрируйтесь.</p>
-                <a href="{% url 'login' %}" class="btn btn-primary btn-lg me-3">Войти</a>
-                <a href="{% url 'register' %}" class="btn btn-secondary btn-lg">Зарегистрироваться</a>
+                <div class="d-flex justify-content-center gap-3 mb-3">
+                    <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Войти</a>
+                    <a href="{% url 'register' %}" class="btn btn-secondary btn-lg">Зарегистрироваться</a>
+                </div>
+                <p class="mb-3">Пока вы не зарегистрированы, можете только просматривать форум!</p>
+                <a href="{% url 'forum_home' %}" class="btn btn-outline-success btn-lg">Перейти на форум</a>
             {% endif %}
         </div>
     </div>

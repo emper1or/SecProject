@@ -33,26 +33,26 @@
         </button>
         {% if user.is_authenticated %}
         <div class="collapse navbar-collapse" id="navbarResponsive">
-    <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav ms-auto">
 
-        <div class="search-container">
-    <input type="text" id="book-search" placeholder="Введите название книги...">
-    <button id="search-icon" class="search-button">🔍</button>
-</div>
-        <li class="nav-item"><a class="nav-link" href="{% url 'book_search_isbn' %}">Поиск книг по Штрих Коду</a></li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'dashboard' %}">Библиотека</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'profile' %}">Профиль</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'logout' %}">Выйти</a>
-        </li>
-        <!-- Кнопка поиска -->
+                <div class="search-container">
+                    <input type="text" id="book-search" placeholder="Введите название книги...">
+                    <button id="search-icon" class="search-button">🔍</button>
+                </div>
+                <li class="nav-item"><a class="nav-link" href="{% url 'book_search_isbn' %}">Поиск книг по Штрих Коду</a></li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard' %}">Библиотека</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'profile' %}">Профиль</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Выйти</a>
+                </li>
+                <!-- Кнопка поиска -->
 
-    </ul>
-</div>
+            </ul>
+        </div>
         {% else %}
         <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav ms-auto">
@@ -62,10 +62,7 @@
         </div>
 
 
-        <div id="search-container" class="search-container hidden">
-    <input type="text" id="book-search" placeholder="Введите название книги...">
-    <div id="search-results"></div>
-</div>
+
         {% endif %}
     </div>
 </nav>
