@@ -5,14 +5,12 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <!-- Заголовок -->
             <div class="text-center mb-4">
+                <label>{{ user.avatar.url }}</label>
                 <div id="avatar-container">
-                    {% if user.avatar %}
-                        <img src="{{ user.avatar.url }}" alt="Текущий аватар" class="rounded-circle mb-2" width="100" height="100">
+                    <img src="{{ user.avatar.url }}" alt="Текущий аватар" class="rounded-circle mb-2" width="100" height="100">
+                    {% if user.avatar.url != '/media/avatars/default_avatar.jpg' %}
                         <button id="delete-avatar-btn" class="btn btn-danger btn-sm">Удалить аватар</button>
-                    {% else %}
-                       <img src="/media/avatars/default_avatar.jpg" alt="Аватар по умолчанию" class="rounded-circle mb-2" width="100" height="100">
                     {% endif %}
                 </div>
             </div>

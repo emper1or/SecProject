@@ -12,11 +12,7 @@
         </div>
 
         <div class="profile-avatar mb-4">
-            {% if user.avatar %}
-                <img src="{{ user.avatar.url }}" alt="Аватар" class="rounded-circle" width="150" height="150">
-            {% else %}
-                <img  src="/media/avatars/default_avatar.jpg" alt="Аватар" class="rounded-circle" width="150" height="150">
-            {% endif %}
+            <img src="{{ user.avatar.url }}" alt="Аватар" class="rounded-circle" width="150" height="150">
         </div>
 
         <div class="profile-info text-start">

@@ -230,8 +230,7 @@ def delete_avatar(request):
     if request.method == 'POST':
         user = request.user
         if user.avatar:
-            user.avatar.delete()  # Удаляем файл
-            user.avatar = None    # Очищаем поле
+            user.avatar = 'avatars/default_avatar.jpg' # Удаляем файл
             user.save()
             return JsonResponse({'success': True, 'message': 'Аватар успешно удален.'})
         else:

@@ -14,9 +14,9 @@ class CustomUser(AbstractUser):
     avatar = models.ImageField(
         upload_to='avatars/',
         blank=True,
-        null=True,
+        null=False,
         verbose_name='Аватар',
-        default='avatars/default_avatar.jpg',
+        default='avatars/default_avatar.jpg'
     )
 
     groups = models.ManyToManyField(
