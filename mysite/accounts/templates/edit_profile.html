@@ -6,53 +6,87 @@
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <!-- Заголовок -->
-            <div class="text-center mb-5">
-                <h1 class="display-4">Редактирование профиля</h1>
-            </div>
-
-            <!-- Форма редактирования профиля -->
-            <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-                {% csrf_token %}
-                
-                <!-- Current Avatar -->
-                <div class="text-center mb-4">
+            <div class="text-center mb-4">
+                <div id="avatar-container">
                     {% if user.avatar %}
                         <img src="{{ user.avatar.url }}" alt="Текущий аватар" class="rounded-circle mb-2" width="100" height="100">
+                        <button id="delete-avatar-btn" class="btn btn-danger btn-sm">Удалить аватар</button>
                     {% else %}
-                        <img src="{% static 'images/default_avatar.jpg' %}" alt="Аватар по умолчанию" class="rounded-circle mb-2" width="100" height="100">
+                       <img src="/media/avatars/default_avatar.jpg" alt="Аватар по умолчанию" class="rounded-circle mb-2" width="100" height="100">
                     {% endif %}
                 </div>
-                
+            </div>
+            <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                {% csrf_token %}
                 {% for field in form %}
                     <div class="mb-3">
                         <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
                         {% if field.name == 'avatar' %}
                             <input type="file" class="form-control" id="{{ field.id_for_label }}" name="{{ field.name }}">
                         {% else %}
-                            <input type="{{ field.field.widget.input_type }}" 
-                                   class="form-control" 
-                                   id="{{ field.id_for_label }}" 
-                                   name="{{ field.name }}" 
+                            <input type="{{ field.field.widget.input_type }}"
+                                   class="form-control"
+                                   id="{{ field.id_for_label }}"
+                                   name="{{ field.name }}"
                                    value="{{ field.value|default_if_none:'' }}">
                         {% endif %}
-                        
+
                         {% if field.help_text %}
                             <small class="form-text text-muted">{{ field.help_text }}</small>
                         {% endif %}
-                        
+
                         {% for error in field.errors %}
                             <div class="alert alert-danger mt-2" role="alert">{{ error }}</div>
                         {% endfor %}
                     </div>
                 {% endfor %}
-                
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary">Сохранить изменения</button>
-                    <a href="{% url 'profile' %}" class="btn btn-secondary">Отмена</a>
-                </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                        <a href="{% url 'profile' %}" class="btn btn-secondary">Отмена</a>
+                    </div>
             </form>
         </div>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteBtn = document.getElementById('delete-avatar-btn');
 
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function() {
+            if (confirm('Вы уверены, что хотите удалить аватар?')) {
+                fetch("{% url 'delete_avatar' %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Обновляем контейнер с аватаром
+                        const avatarContainer = document.getElementById('avatar-container');
+                        avatarContainer.innerHTML = `
+                            <img src="/media/avatars/default_avatar.jpg"
+                                 alt="Аватар по умолчанию"
+                                 class="rounded-circle mb-2"
+                                 width="100" height="100">
+                        `;
+                        alert(data.message);
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Произошла ошибка при удалении аватара.');
+                });
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

@@ -9,6 +9,7 @@ from django.core.mail import send_mail  # Импортируем функцию 
 from django.shortcuts import render, redirect, get_object_or_404
 from games.models import Game, GameCover
 from library.models import Book, BookCover
+from django.http import JsonResponse
 
 from .forms import RegisterForm, VerificationForm, ResetPasswordForm, PasswordChangeForm, UserEditForm
 
@@ -56,7 +57,8 @@ def login_view(request):
             request.session['user_id'] = user.id  # Store user ID in session
             return redirect('verify')  # Redirect to verification page
         else:
-            return render(request, 'login.html', {'error': 'Неверное имя пользователя или пароль', 'username_value': username})
+            return render(request, 'login.html',
+                          {'error': 'Неверное имя пользователя или пароль', 'username_value': username})
     else:
         return render(request, 'login.html')
 
@@ -208,7 +210,11 @@ def profile(request):
 @login_required
 def edit_profile(request):
     if request.method == 'POST':
-        # Добавьте request.FILES в форму
+        # Если была отправлена форма удаления аватара
+        if 'delete_avatar' in request.POST:
+            return delete_avatar(request)
+
+        # Обычное сохранение формы
         form = UserEditForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
@@ -217,6 +223,21 @@ def edit_profile(request):
     else:
         form = UserEditForm(instance=request.user)
     return render(request, 'edit_profile.html', {'form': form})
+
+
+@login_required
+def delete_avatar(request):
+    if request.method == 'POST':
+        user = request.user
+        if user.avatar:
+            user.avatar.delete()  # Удаляем файл
+            user.avatar = None    # Очищаем поле
+            user.save()
+            return JsonResponse({'success': True, 'message': 'Аватар успешно удален.'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Аватар уже отсутствует.'}, status=400)
+    return JsonResponse({'error': 'Метод не разрешен'}, status=405)
+
 
 @login_required
 def change_password(request):
