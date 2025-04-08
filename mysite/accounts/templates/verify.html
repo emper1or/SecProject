@@ -2,15 +2,26 @@
 
 {% block content %}
     <div class="container d-flex justify-content-center align-items-center vh-0">
-        <div class="card shadow-lg p-4" style="width: 300px;">
+        <div class="card shadow-lg p-4" style="width: 350px;">
             <h2 class="text-center text-primary">Верификация</h2>
+
+            {% if messages %}
+                {% for message in messages %}
+                    {% if "Неверный код" not in message.message %}  {# Не показываем сообщения о неверном коде #}
+                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
+            {% if error_message %}
+                <div class="alert alert-danger">{{ error_message }}</div>
+            {% endif %}
 
             <form method="POST" novalidate>
                 {% csrf_token %}
                 <div class="mb-3">
                     <label for="verification_code" class="form-label" style="color: black">Введите код верификации</label>
                     {{ form.verification_code }}
-                    <!-- Показываем ошибку, если валидация не прошла -->
                     {% if form.errors.verification_code %}
                         <div class="text-danger small" style="color: black">
                             {{ form.errors.verification_code|join:", " }}
@@ -20,10 +31,9 @@
                 <button type="submit" class="btn btn-primary w-100">Подтвердить</button>
             </form>
 
-            {% if remaining_attempts > 0 %}
-                <p style="color: black">Осталось попыток: {{ remaining_attempts }}</p>
-                <p><a href="{% url 'login' %}">Отправить код еще раз</a></p>
-            {% endif %}
+            <div class="mt-3">
+                <p><a href="{% url 'resend_code' %}">Отправить новый код</a></p>
+            </div>
         </div>
     </div>
 {% endblock %}

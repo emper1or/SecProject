@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from .models import CustomUser
 import re
+from django.core.exceptions import ValidationError
 
 User = get_user_model()
 
@@ -39,21 +40,28 @@ class RegisterForm(UserCreationForm):
             return user
 
 
+
 class VerificationForm(forms.Form):
     verification_code = forms.CharField(
         label="Код верификации",
         max_length=6,
-        min_length=6,  # Код верификации должен быть фиксированной длины
+        min_length=6,
         required=True,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите шестизначный код'}),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Введите шестизначный код',
+            'inputmode': 'numeric',
+            'pattern': '[0-9]*'
+        }),
         help_text="Введите код из отправленного письма."
     )
 
     def clean_verification_code(self):
         code = self.cleaned_data.get("verification_code")
-        # Пример: проверка на цифры (код должен состоять только из чисел)
         if not code.isdigit():
-            raise forms.ValidationError("Код должен содержать только числа.")
+            raise ValidationError("Код должен содержать только цифры.")
+        if len(code) != 6:
+            raise ValidationError("Код должен состоять из 6 цифр.")
         return code
 
 
