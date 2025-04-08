@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from .models import CustomUser
 import re
 
 User = get_user_model()
@@ -9,6 +10,7 @@ User = get_user_model()
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
+
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
@@ -36,6 +38,7 @@ class RegisterForm(UserCreationForm):
                 user.save()
             return user
 
+
 class VerificationForm(forms.Form):
     verification_code = forms.CharField(
         label="Код верификации",
@@ -53,22 +56,28 @@ class VerificationForm(forms.Form):
             raise forms.ValidationError("Код должен содержать только числа.")
         return code
 
+
 class ResetPasswordForm(forms.Form):
     verification_code = forms.CharField(
         label="Код подтверждения",
         max_length=6,
         required=True,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Код из email'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Код из email'}),
+        help_text="Введите ваш код подтверждения с Вашей почты."
     )
     password = forms.CharField(
         label="Новый пароль",
         required=True,
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Новый пароль'})
+        validators=[validate_password],
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Новый пароль'}),
+        help_text="Пароль должен быть не менее 8 символов и содержать буквы и цифры."
     )
     confirm_password = forms.CharField(
         label="Подтвердите новый пароль",
         required=True,
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Повторите новый пароль'})
+        validators=[validate_password],
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Повторите новый пароль'}),
+        help_text="Введите новый пароль ещё раз для проверки."
     )
 
     def clean(self):
@@ -125,10 +134,6 @@ class PasswordChangeForm(forms.Form):
         if new_password1 and new_password2 and new_password1 != new_password2:
             raise forms.ValidationError("Новые пароли не совпадают.")
         return cleaned_data
-
-
-from django import forms
-from .models import CustomUser
 
 
 class UserEditForm(forms.ModelForm):

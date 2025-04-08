@@ -4,6 +4,7 @@
 {% block content %}
     <head>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
         <style>
             .form-container {
                 max-width: 420px;
@@ -97,12 +98,13 @@
                     
                     <!-- Пароль -->
                     <div class="form-field">
+
                         <label for="password" class="form-label">Пароль</label>
                         <div class="input-wrapper">
                             <input type="password" class="form-input" id="password" name="password" required>
-                            <button type="button" class="password-toggle" onclick="togglePassword('password')">
-                                <i class="fas fa-eye"></i>
-                            </button>
+                            <span class="position-absolute top-50 end-0 translate-middle-y me-3" style="cursor: pointer; z-index: 5;">
+                            <i class="fas fa-eye text-muted" onclick="togglePassword('password', this)"></i>
+                            </span>
                         </div>
                     </div>
 
@@ -116,19 +118,22 @@
             </div>
         </div>
     </div>
-
     <script>
-        function togglePassword(inputId) {
+        function togglePassword(inputId, iconElement) {
             const input = document.getElementById(inputId);
-            const icon = document.querySelector(`button[onclick="togglePassword('${inputId}')"] i`);
-            
+
             if (input.type === 'password') {
                 input.type = 'text';
-                icon.classList.replace('fa-eye', 'fa-eye-slash');
+                iconElement.classList.replace('fa-eye', 'fa-eye-slash');
+                iconElement.classList.add('text-primary');
             } else {
                 input.type = 'password';
-                icon.classList.replace('fa-eye-slash', 'fa-eye');
+                iconElement.classList.replace('fa-eye-slash', 'fa-eye');
+                iconElement.classList.remove('text-primary');
             }
+
+            // Фокус обратно на input после клика на иконку
+            input.focus();
         }
     </script>
 {% endblock %}

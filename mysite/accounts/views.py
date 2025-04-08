@@ -7,7 +7,6 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.mail import send_mail  # Импортируем функцию для отправки почты
 from django.shortcuts import render, redirect, get_object_or_404
-
 from games.models import Game, GameCover
 from library.models import Book, BookCover
 
@@ -171,7 +170,6 @@ def forgot_password(request):
 
     return render(request, 'forgot_password.html')
 
-from django.contrib.auth.hashers import make_password
 
 def reset_password(request):
     user_id = request.session.get('user_id')
@@ -195,9 +193,6 @@ def reset_password(request):
                 return redirect('login')
             else:
                 messages.error(request, 'Неверный код подтверждения.')
-        else:
-            for error in form.errors.values():
-                messages.error(request, error)
 
     else:
         form = ResetPasswordForm()
