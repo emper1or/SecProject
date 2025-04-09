@@ -3,7 +3,177 @@
 {% block content %}
 <form method="POST" action="{% url 'book_search_isbn' %}">
     {% csrf_token %}
-    <input type="text" name="isbn" placeholder="Введите ISBN" required>
+    <input type="text" name="isbn" id="isbnInput" placeholder="Введите ISBN" required>
     <button type="submit">Найти</button>
 </form>
+
+<button id="startScanner">Сканировать штрих-код</button>
+<div id="scanner-container" style="display: none; width: 100%; max-width: 500px; margin: 20px auto; position: relative;">
+    <video id="scanner" width="100%" playsinline style="border: 2px solid #4CAF50; border-radius: 8px; background: black;"></video>
+    <div style="position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px; border: 2px dashed rgba(76, 175, 80, 0.7); pointer-events: none;"></div>
+    <button id="stopScanner" style="margin-top: 10px;">Остановить сканирование</button>
+    <p id="scanStatus" style="color: #4CAF50; font-weight: bold;"></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const startBtn = document.getElementById('startScanner');
+        const stopBtn = document.getElementById('stopScanner');
+        const scannerContainer = document.getElementById('scanner-container');
+        const scannerElement = document.getElementById('scanner');
+        const isbnInput = document.getElementById('isbnInput');
+        const scanStatus = document.getElementById('scanStatus');
+        let stream = null;
+
+        // Функция определения типа устройства
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // Функция получения оптимальных параметров камеры
+        function getCameraSettings() {
+            return {
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                facingMode: isMobileDevice() ? { exact: "environment" } : "user",
+                focusMode: "continuous"
+            };
+        }
+
+        startBtn.addEventListener('click', async function() {
+            try {
+                scannerContainer.style.display = 'block';
+                startBtn.style.display = 'none';
+                scanStatus.textContent = 'Инициализация камеры...';
+
+                // Получаем доступ к камере с оптимальными настройками
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: getCameraSettings(),
+                    audio: false
+                });
+
+                // Показываем поток в видео элементе
+                scannerElement.srcObject = stream;
+                await scannerElement.play();
+                scanStatus.textContent = 'Наведите камеру на штрих-код';
+
+                // Инициализация Quagga с динамическими настройками
+                Quagga.init({
+                    inputStream: {
+                        name: "Live",
+                        type: "LiveStream",
+                        target: scannerElement,
+                        constraints: getCameraSettings()
+                    },
+                    decoder: {
+                        readers: isMobileDevice() ?
+                            ["ean_reader", "ean_8_reader"] :  // Для мобильных - только основные форматы
+                            ["ean_reader", "ean_8_reader", "code_128_reader", "upc_reader", "upc_e_reader"],
+                    },
+                    locate: true,
+                    numOfWorkers: isMobileDevice() ? 2 : 4  // Меньше воркеров для мобильных
+                }, function(err) {
+                    if (err) {
+                        console.error(err);
+                        scanStatus.textContent = 'Ошибка инициализации сканера';
+                        stopScanner();
+                        return;
+                    }
+                    Quagga.start();
+                    scanStatus.textContent = 'Готово к сканированию. Наведите на штрих-код';
+                });
+
+                Quagga.onDetected(function(result) {
+                    if (!result.codeResult) return;
+
+                    const code = result.codeResult.code;
+                    isbnInput.value = code;
+                    scanStatus.textContent = 'Найден штрих-код: ' + code;
+
+                    // Визуальная обратная связь
+                    scannerElement.style.border = '2px solid #ff5722';
+                    setTimeout(() => {
+                        scannerElement.style.border = '2px solid #4CAF50';
+                    }, 1000);
+
+                    // Вибрация для мобильных (если поддерживается)
+                    if (isMobileDevice() && navigator.vibrate) {
+                        navigator.vibrate(200);
+                    }
+                });
+
+            } catch (err) {
+                console.error("Ошибка:", err);
+                scanStatus.textContent = 'Ошибка: ' + (err.message || 'Не удалось получить доступ к камере');
+                stopScanner();
+            }
+        });
+
+        function stopScanner() {
+            if (Quagga && Quagga.initialized) {
+                Quagga.stop();
+            }
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            if (scannerElement.srcObject) {
+                scannerElement.srcObject = null;
+            }
+            scannerContainer.style.display = 'none';
+            startBtn.style.display = 'block';
+        }
+
+        stopBtn.addEventListener('click', stopScanner);
+    });
+</script>
+
+<style>
+    #startScanner, #stopScanner {
+        padding: 12px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 10px 0;
+        transition: background-color 0.3s;
+    }
+
+    #startScanner:hover, #stopScanner:hover {
+        background-color: #45a049;
+    }
+
+    #scanner-container {
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    #scanStatus {
+        margin: 10px 0;
+        min-height: 24px;
+        text-align: center;
+    }
+
+    #scanner {
+        background: #000;
+        display: block;
+        margin: 0 auto;
+    }
+
+    @media (max-width: 600px) {
+        #scanner-container {
+            width: 95%;
+            padding: 10px;
+        }
+
+        #startScanner, #stopScanner {
+            padding: 10px 16px;
+            font-size: 15px;
+        }
+    }
+</style>
 {% endblock %}
