@@ -8,10 +8,10 @@
     margin-top: 2rem !important;
 
 }
-</style>>
+</style>
     <head>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
         <title>BestProject</title>
@@ -43,10 +43,15 @@
         <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav ms-auto">
 
-                <div class="search-container">
-                    <input type="text" id="book-search" placeholder="Введите название книги...">
-                    <button id="search-icon" class="search-button">🔍</button>
-                </div>
+                 <div class="search-container-header">
+                        <input type="text" id="book-search-header" placeholder="Введите название книги...">
+                        <button id="search-icon-header" class="search-button-header">🔍</button>
+                    </div>
+
+                    <div class="search-container-dropdown">
+                                    <input type="text" id="book-search-dropdown" placeholder="Введите название книги...">
+                                    <button id="search-icon-dropdown" class="search-button-dropdown">🔍</button>
+                    </div>
                 <li class="nav-item"><a class="nav-link"  href="{% url 'forum_home' %}">Форум</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'book_search_isbn' %}">Поиск книг по Штрих Коду</a></li>
                 <li class="nav-item">
@@ -123,10 +128,10 @@
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
 <script>
-$(function() {
-    $("#book-search").autocomplete({
-        appendTo: "body", // Переносит список автозаполнения в <body>, чтобы он не был ограничен родителем
-        position: { my: "left top", at: "left bottom+5", collision: "none" }, // Точное позиционирование под полем поиска
+function applyAutocomplete(selector) {
+    $(selector).autocomplete({
+        appendTo: "body",
+        position: { my: "left top", at: "left bottom+5", collision: "none" },
         source: function(request, response) {
             $.getJSON("{% url 'autocomplete' %}", {
                 term: request.term
@@ -142,25 +147,28 @@ $(function() {
         },
         minLength: 2,
         select: function(event, ui) {
-            // Перенаправляем на страницу с деталями книги
             window.location.href = "{% url 'book_detail' 'BOOK_ID' %}".replace('BOOK_ID', ui.item.id);
         },
         open: function() {
             $(".ui-autocomplete").css({
-                "position": "fixed", // Делаем список фиксированным
-                "top": $("#book-search").offset().top + $("#book-search").outerHeight() + "px", // Подгоняем под поле ввода
-                "left": $("#book-search").offset().left + "px",
-                "width": $("#book-search").outerWidth() + "px", // Делаем ширину равной полю ввода
+                "position": "fixed",
+                "top": $(selector).offset().top + $(selector).outerHeight() + "px",
+                "left": $(selector).offset().left + "px",
+                "width": $(selector).outerWidth() + "px",
                 "background": "rgba(255, 255, 255, 0.95)",
                 "border": "1px solid rgba(200, 200, 200, 0.5)",
                 "border-radius": "10px",
                 "box-shadow": "0px 4px 10px rgba(0, 0, 0, 0.3)",
-                "z-index": "9999" // Поднимаем выше всех элементов
+                "z-index": "9999"
             });
         }
     });
-});
+}
 
+$(function() {
+    applyAutocomplete("#book-search-header");
+    applyAutocomplete("#book-search-dropdown");
+});
 </script>
 
 

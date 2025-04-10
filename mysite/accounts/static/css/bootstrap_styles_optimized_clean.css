@@ -5559,49 +5559,93 @@ header.masthead .bg-circle-4 {
 
 
 
-.search-container {
-    position: absolute;
-    top: 50%;
-    left: 25%;
-    transform: translate(-50%, -50%);
+/* Основной стиль для поиска в хедере */
+.search-container-header {
     display: flex;
     align-items: center;
     background: #ffffff;
-    border: 2px solid #239AFE; /* Светлая, тонкая обводка */
+    border: 2px solid #239AFE;
     border-radius: 100px;
-    padding: 1px 4px;
+    padding: 4px 10px;
     transition: all 0.3s ease-in-out;
+    max-width: 1000px;
+    margin: 0 auto;
+    position: absolute;
+    left: 250px; /* Расположим ближе к логотипу */
+    top: 50%;
+    transform: translateY(-50%); /* Центрируем по вертикали */
+    width: 20%;
 }
 
-.search-container input {
-    width: 220px;
+/* Стиль для поиска в выпадающем меню (по умолчанию скрыто) */
+.search-container-dropdown {
+    display: none; /* Скрыто по умолчанию */
+    align-items: center;
+    background: #ffffff;
+    border: 2px solid #239AFE;
+    border-radius: 100px;
+    padding: 4px 10px;
+    transition: all 0.3s ease-in-out;
+    width: 100%;
+    margin-top: 10px; /* Добавляем отступ сверху */
+}
+
+/* Стиль для поля ввода */
+.search-container-header input,
+.search-container-dropdown input {
+    width: 100%;
     padding: 6px 10px;
     border: none;
     border-radius: 10px;
     outline: none;
     font-size: 16px;
     background: transparent;
-    color: #239AFE; /* Светло-серый цвет текста */
+    color: #239AFE;
     caret-color: rgba(230, 230, 230, 0.9);
+    text-align: left !important;
 }
 
-.search-container input::placeholder {
-    color: #239AFE; /* Полупрозрачный серый для placeholder */
+/* Стиль для placeholder */
+.search-container-header input::placeholder,
+.search-container-dropdown input::placeholder {
+    color: #239AFE;
 }
 
+/* Кнопка поиска */
 .search-button {
     background: none;
     border: none;
+    color: #239AFE;
     font-size: 18px;
     margin-left: 6px;
+    padding: 0;
     cursor: pointer;
-    color: rgba(230, 230, 230, 0.7);
-    transition: color 0.3s ease-in-out;
+    display: flex;
+    align-items: center;
+
 }
 
 .search-button:hover {
-    color: #ffffff; /* Белый при наведении */
+    color: #1b70d1;
 }
+
+.search-button:focus {
+    outline: none;
+}
+/* На мобильных устройствах скрываем поиск в хедере и показываем в выпадающем меню */
+@media (max-width: 991.98px) {
+    /* Скрыть поле поиска в хедере на мобильных */
+    .search-container-header {
+        display: none;
+    }
+
+    /* Показать поле поиска в выпадающем меню на мобильных */
+    .search-container-dropdown {
+        display: flex; /* Показываем поле поиска в выпадающем меню */
+    }
+}
+
+
 
 .autocomplete-list {
     position: absolute; /* Теперь список будет правильно позиционироваться */
