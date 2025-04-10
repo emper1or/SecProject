@@ -12,7 +12,7 @@ def get_book_suggestions(query):
     params = {
         "q": query,
         "langRestrict": "ru",
-        "maxResults": 10,
+        "maxResults": 5,
         "fields": "items(id,volumeInfo/title,volumeInfo/authors)"
     }
 

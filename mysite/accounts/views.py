@@ -61,7 +61,7 @@ def register(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            messages.success(request, 'На вашу электронную почту отправлен код подтверждения регистрации.')
+            messages.info(request, 'На вашу электронную почту отправлен код подтверждения регистрации.')
             logger.info(f'Новый пользователь зарегистрирован: {user.username}')
             user.verification_code = generate_verification_code()
             user.verification_attempts = 0

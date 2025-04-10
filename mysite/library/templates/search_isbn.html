@@ -1,18 +1,18 @@
 {% extends 'index.html' %}
 
 {% block content %}
-<form method="POST" action="{% url 'book_search_isbn' %}">
+<form method="POST" action="{% url 'book_search_isbn' %}" class="search-form">
     {% csrf_token %}
     <input type="text" name="isbn" id="isbnInput" placeholder="Введите ISBN" required>
-    <button type="submit">Найти</button>
+    <button type="submit">🔍 </button>
 </form>
-
+<p class="or-separator">или</p>
 <button id="startScanner">Сканировать штрих-код</button>
 <div id="scanner-container" style="display: none; width: 100%; max-width: 500px; margin: 20px auto; position: relative;">
-    <video id="scanner" width="100%" playsinline style="border: 2px solid #4CAF50; border-radius: 8px; background: black;"></video>
-    <div style="position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px; border: 2px dashed rgba(76, 175, 80, 0.7); pointer-events: none;"></div>
+    <video id="scanner" width="100%" playsinline style="border: 2px solid #007ba8; border-radius: 8px; background: black;"></video>
+    <div style=""></div>
     <button id="stopScanner" style="margin-top: 10px;">Остановить сканирование</button>
-    <p id="scanStatus" style="color: #4CAF50; font-weight: bold;"></p>
+    <p id="scanStatus" style="color: #00A1DB; font-weight: bold;"></p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
@@ -94,7 +94,7 @@
                     // Визуальная обратная связь
                     scannerElement.style.border = '2px solid #ff5722';
                     setTimeout(() => {
-                        scannerElement.style.border = '2px solid #4CAF50';
+                        scannerElement.style.border = '2px solid #00A1DB';
                     }, 1000);
 
                     // Вибрация для мобильных (если поддерживается)
@@ -122,6 +122,8 @@
             }
             scannerContainer.style.display = 'none';
             startBtn.style.display = 'block';
+            startBtn.style.marginLeft = 'auto';  // Центрируем кнопку
+            startBtn.style.marginRight = 'auto';  // Центрируем кнопку
         }
 
         stopBtn.addEventListener('click', stopScanner);
@@ -130,40 +132,43 @@
 
 <style>
     #startScanner, #stopScanner {
-        padding: 12px 20px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 16px;
-        margin: 10px 0;
-        transition: background-color 0.3s;
-    }
+    padding: 12px 20px;
+    background-color: #00A1DB;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    margin: 10px 0;
+    transition: background-color 0.3s;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
 
-    #startScanner:hover, #stopScanner:hover {
-        background-color: #45a049;
-    }
+#startScanner:hover, #stopScanner:hover {
+    background-color: #007ba8;
+}
 
-    #scanner-container {
-        background: #f9f9f9;
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
+#scanner-container {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;  /* центрирует элементы внутри контейнера */
+}
 
-    #scanStatus {
-        margin: 10px 0;
-        min-height: 24px;
-        text-align: center;
-    }
+#scanStatus {
+    margin: 10px 0;
+    min-height: 24px;
+    text-align: center;
+}
 
-    #scanner {
-        background: #000;
-        display: block;
-        margin: 0 auto;
-    }
-
+#scanner {
+    background: #000;
+    display: block;
+    margin: 0 auto;
+}
     @media (max-width: 600px) {
         #scanner-container {
             width: 95%;
@@ -175,5 +180,56 @@
             font-size: 15px;
         }
     }
+.search-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 30px auto;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 600px;
+}
+
+.search-form input[type="text"] {
+    width: 100%;
+    max-width: 300px;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    transition: 0.3s ease;
+}
+
+.search-form input[type="text"]:focus {
+    border-color: #00A1DB;
+    outline: none;
+    box-shadow: 0 0 6px rgba(76, 175, 80, 0.4);
+}
+
+.search-form button[type="submit"] {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #00A1DB;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.search-form button[type="submit"]:hover {
+    background-color: #007ba8;
+    transform: translateY(-2px);
+}
+    .or-separator {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 500;
+    margin: 15px 0;
+    color: #666;
+}
+
+
 </style>
 {% endblock %}

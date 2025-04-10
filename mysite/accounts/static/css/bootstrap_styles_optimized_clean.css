@@ -2218,7 +2218,7 @@ textarea.form-control-lg {
   padding: var(--bs-nav-link-padding-y) var(--bs-nav-link-padding-x);
   font-size: var(--bs-nav-link-font-size);
   font-weight: var(--bs-nav-link-font-weight);
-  color: var(--bs-nav-link-color);
+  color: #ffffff;
   text-decoration: none;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
 }
@@ -5051,7 +5051,7 @@ font-weight: bold;
   padding-left: 1.5rem;
 }
 .px-5 {
-  padding-right: 3rem;
+  padding-right: 0.7rem;
   padding-left: 3rem;
 }
 .py-0 {
@@ -5473,8 +5473,8 @@ html {
   letter-spacing: 0.1rem;
 }
 .navbar-custom {
-  padding-top: 0rem;
-  padding-bottom: 0rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
   background-color: #87cefa;
 }
 .navbar-custom .navbar-brand {
@@ -5493,13 +5493,8 @@ header.masthead {
   position: relative;
   overflow: hidden;
   padding-top: calc(8rem + 2px);
-  padding-bottom: 14rem;
+  padding-bottom: 5rem;
   background-color: #ffffff;
-  /* background: url("https://psv4.userapi.com/s/v1/d/9QE21q8AFeXDvLNgTG4nSm2FRfTjpHvCPIdaIIVsLfHQgNYfKzXwyJzBuiI36VRm3_lVnfLM0GqjoZ2Eyjw5U2ogfkTSGC2tnYJ6lHK1XsJ12TkEHg-zTw/Frame_1_5_-Photoroom_1.png") no-repeat right top fixed;
-  background-size: 750px; /* размер картинки, можешь подогнать под себя */
-  background-repeat: no-repeat;
-  background-position: right top;
-  background-attachment: fixed;
 }
 
 }
@@ -5565,13 +5560,13 @@ header.masthead .bg-circle-4 {
 
 
 .search-container {
-    position: absolute;
+    position: fixed;
     top: 50%;
     left: 25%;
     transform: translate(-50%, -50%);
     display: flex;
     align-items: center;
-    background: transparent;
+    background: #ffffff;
     border: 2px solid #239AFE; /* Светлая, тонкая обводка */
     border-radius: 100px;
     padding: 1px 4px;
@@ -5633,9 +5628,3 @@ header.masthead .bg-circle-4 {
 .autocomplete-list li:hover {
     background: #f0f0f0; /* Светло-серый фон при наведении */
 }
-
-
-
-
-
-
