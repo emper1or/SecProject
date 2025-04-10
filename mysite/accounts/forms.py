@@ -40,7 +40,6 @@ class RegisterForm(UserCreationForm):
             return user
 
 
-
 class VerificationForm(forms.Form):
     verification_code = forms.CharField(
         label="Код верификации",
@@ -96,19 +95,6 @@ class ResetPasswordForm(forms.Form):
         # Проверка на совпадение паролей
         if password and confirm_password and password != confirm_password:
             raise forms.ValidationError("Пароли не совпадают!")
-
-        # Проверка на соответствие требованиям
-        if password:
-            if len(password) < 8 or len(password) > 20:
-                raise forms.ValidationError("Пароль должен содержать от 8 до 20 символов.")
-            if not re.search(r"[A-Z]", password):
-                raise forms.ValidationError("Пароль должен содержать хотя бы одну заглавную букву.")
-            if not re.search(r"[a-z]", password):
-                raise forms.ValidationError("Пароль должен содержать хотя бы одну строчную букву.")
-            if not re.search(r"[0-9]", password):
-                raise forms.ValidationError("Пароль должен содержать хотя бы одну цифру.")
-            if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
-                raise forms.ValidationError("Пароль должен содержать хотя бы один специальный символ.")
 
         return cleaned_data
 

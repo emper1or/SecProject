@@ -5,16 +5,9 @@
         <div class="card shadow-lg p-4" style="width: 350px;">
             <h2 class="text-center text-primary">Верификация</h2>
 
-            {% if messages %}
-                {% for message in messages %}
-                    {% if "Неверный код" not in message.message %}  {# Не показываем сообщения о неверном коде #}
-                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
 
             {% if error_message %}
-                <div class="alert alert-danger">{{ message.error }}</div>
+                <div class="alert alert-danger">{{ error_message }}</div>
             {% endif %}
 
             <form method="POST" novalidate>
@@ -23,7 +16,7 @@
                     <label for="verification_code" class="form-label" style="color: black">Введите код верификации</label>
                     {{ form.verification_code }}
                     {% if form.errors.verification_code %}
-                        <div class="text-danger small" style="color: black">
+                        <div class="alert alert-danger" role="alert">
                             {{ form.errors.verification_code|join:", " }}
                         </div>
                     {% endif %}

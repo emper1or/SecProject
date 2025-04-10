@@ -252,7 +252,6 @@ def reset_password(request):
 
     if request.method == 'POST':
         form = ResetPasswordForm(request.POST)
-
         if form.is_valid():
             code = form.cleaned_data['verification_code']
             new_password = form.cleaned_data['password']
@@ -264,8 +263,8 @@ def reset_password(request):
                 messages.success(request, 'Пароль успешно изменён! Теперь вы можете войти с новым паролем.')
                 return redirect('login')
             else:
-                messages.error(request, 'Неверный код подтверждения.')
-
+                form.add_error('verification_code', 'Неверный код подтверждения.')
+                print('123')
     else:
         form = ResetPasswordForm()
 
@@ -320,7 +319,7 @@ def change_password(request):
                 messages.success(request, 'Пароль успешно изменен.')
                 return redirect('profile')
             else:
-                messages.error(request, 'Старый пароль введен неверно.')
+                form.add_error('old_password', 'Старый пароль введен неверно.')
     else:
         form = PasswordChangeForm()
     return render(request, 'change_password.html', {'form': form})
