@@ -10,7 +10,7 @@ from .models import Category, Topic, Message, Vote
 from .forms import TopicForm, MessageForm
 from django.db import models
 from django.db.models import Q
-
+from django.core.paginator import Paginator
 
 def forum_home(request):
     search_query = request.GET.get('q', '')
@@ -96,10 +96,54 @@ def category_topics(request, category_id):
     if request.GET.get('my_topics') and request.user.is_authenticated:
         topics = topics.filter(author=request.user)
 
+    # Пагинация
+    paginator = Paginator(topics.order_by('-created_at'), 10)  # 10 тем на страницу
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'forum/category_topics.html', {
         'category': category,
-        'topics': topics,
+        'page_obj': page_obj,
         'search_query': search_query
+    })
+
+
+def topic_messages(request, topic_id):
+    topic = get_object_or_404(Topic, id=topic_id)
+    forum_messages = Message.objects.filter(
+        topic=topic,
+        parent__isnull=True
+    ).order_by('created_at').select_related('author').prefetch_related(
+        'replies',
+        'votes',
+        'replies__author',
+        'replies__votes'
+    )
+
+    # Пагинация с сохранением объекта QuerySet для обработки голосов
+    paginator = Paginator(forum_messages, 15)  # 15 сообщений на страницу
+    page_number = request.GET.get('page')
+    paginated_messages = paginator.get_page(page_number)
+
+    # Обрабатываем голоса для сообщений на текущей странице
+    messages_to_display = []
+    for message in paginated_messages.object_list:
+        message.likes_count = message.votes.filter(value=1).count()
+        message.dislikes_count = message.votes.filter(value=-1).count()
+
+        if request.user.is_authenticated:
+            vote = message.votes.filter(user=request.user).first()
+            message.user_vote = 'like' if vote and vote.value > 0 else 'dislike' if vote else None
+        else:
+            message.user_vote = None
+
+        messages_to_display.append(message)
+
+    return render(request, 'forum/topic_messages.html', {
+        'topic': topic,
+        'forum_messages': messages_to_display,  # Передаем обработанные сообщения
+        'paginated_messages': paginated_messages,  # Передаем объект пагинации
+        'request': request
     })
 
 
@@ -130,35 +174,6 @@ def delete_topic(request, topic_id):
     return redirect('category_topics', category_id=topic.category.id)
 
 
-def topic_messages(request, topic_id):
-    topic = get_object_or_404(Topic, id=topic_id)
-    forum_messages = Message.objects.filter(
-        topic=topic,
-        parent__isnull=True
-    ).order_by('created_at').select_related('author').prefetch_related(
-        'replies',
-        'votes',
-        'replies__author',
-        'replies__votes'
-    )
-
-    # Add vote counts and user vote status to each message
-    for message in forum_messages:
-        message.likes_count = message.votes.filter(value=1).count()
-        message.dislikes_count = message.votes.filter(value=-1).count()
-
-        if request.user.is_authenticated:
-            vote = message.votes.filter(user=request.user).first()
-            message.user_vote = 'like' if vote and vote.value > 0 else 'dislike' if vote else None
-        else:
-            message.user_vote = None
-
-    return render(request, 'forum/topic_messages.html', {
-        'topic': topic,
-        'forum_messages': forum_messages,
-        'request': request
-    })
-
 
 @login_required
 def add_message(request, topic_id):
@@ -168,18 +183,34 @@ def add_message(request, topic_id):
         parent_id = request.POST.get('parent_id')
 
         if not content:
-            return JsonResponse({'success': False, 'error': 'Пустое сообщение'}, status=400)
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'error': 'Пустое сообщение'}, status=400)
+            messages.error(request, 'Сообщение не может быть пустым')
+            return redirect('topic_messages', topic_id=topic.id)
 
         # Для новых сообщений (не ответов)
         if not parent_id:
-            Message.objects.create(
+            message = Message.objects.create(
                 topic=topic,
                 author=request.user,
                 content=content
             )
 
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': True, 'reload': True})
+                # Добавляем голосовую информацию для нового сообщения
+                message.likes_count = 0
+                message.dislikes_count = 0
+                message.user_vote = None
+
+                html = render_to_string('forum/message.html', {
+                    'message': message,
+                    'request': request
+                })
+                return JsonResponse({
+                    'success': True,
+                    'html': html,
+                    'is_reply': False
+                })
 
             return redirect('topic_messages', topic_id=topic.id)
 
@@ -193,6 +224,11 @@ def add_message(request, topic_id):
         )
 
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            # Добавляем голосовую информацию для нового сообщения
+            message.likes_count = 0
+            message.dislikes_count = 0
+            message.user_vote = None
+
             html = render_to_string('forum/message.html', {
                 'message': message,
                 'request': request
@@ -201,12 +237,14 @@ def add_message(request, topic_id):
                 'success': True,
                 'html': html,
                 'parent_id': parent_id,
-                'message_id': message.id
+                'message_id': message.id,
+                'is_reply': True
             })
 
         return redirect('topic_messages', topic_id=topic.id)
 
     return JsonResponse({'success': False}, status=400)
+
 
 @require_POST
 @login_required

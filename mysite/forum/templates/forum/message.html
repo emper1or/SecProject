@@ -37,7 +37,8 @@
                 <!-- Кнопка лайка -->
                 <button type="button"
                         class="btn btn-sm {% if message.user_vote == 'like' %}btn-success{% else %}btn-outline-success{% endif %} like-btn"
-                        {% if not user.is_authenticated %}disabled{% endif %}>
+                        {% if not user.is_authenticated %}disabled{% endif %}
+                        data-likes-count="{{ message.likes_count }}">
                     <i class="fas fa-thumbs-up"></i>
                     <span class="like-count">{{ message.likes_count }}</span>
                 </button>
@@ -45,7 +46,8 @@
                 <!-- Кнопка дизлайка -->
                 <button type="button"
                         class="btn btn-sm {% if message.user_vote == 'dislike' %}btn-danger{% else %}btn-outline-danger{% endif %} dislike-btn"
-                        {% if not user.is_authenticated %}disabled{% endif %}>
+                        {% if not user.is_authenticated %}disabled{% endif %}
+                        data-dislikes-count="{{ message.dislikes_count }}">
                     <i class="fas fa-thumbs-down"></i>
                     <span class="dislike-count">{{ message.dislikes_count }}</span>
                 </button>

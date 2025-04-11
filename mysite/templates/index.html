@@ -107,9 +107,9 @@
                         </div>
                     {% endfor %}
                  {% endif %}
-                 {% if some_messages %}
-                        {% for some_message in some_messages %}
-                            <div class="alert alert-{{ some_message.tags }}" role="alert" style="color: black">{{ some_message }}</div>
+                 {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}" role="alert" style="color: black">{{ message }}</div>
                         {% endfor %}
                     {% endif %}
                 <main>

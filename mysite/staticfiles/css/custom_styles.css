@@ -1,0 +1,219 @@
+body {
+    background: #ffffff !important;
+    color: #003366;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.container {
+    background: #87cefa !important; /* Светло-светло-голубой фон */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #00A1DB; /* Сохраняем текущую обводку */
+}
+
+input[type="text"], textarea, select {
+    border: 1px solid #00A1DB;
+    background: #FFFFFF; /* Светло-светло-голубой фон */
+    border-radius: 15px;
+    padding: 10px;
+    width: 100%;
+    color: #003366;
+    font-size: 25px;
+    resize: none;
+}
+
+select:focus {
+    outline: none;
+    border-color: #00A1DB;
+    box-shadow: 0 0 0 2px rgba(0, 161, 219, 0.2);
+}
+
+select option {
+    background: #ffffff;
+    color: #003366;
+}
+
+select option:disabled {
+    color: #666;
+}
+
+button[type="submit"].save-button {
+    width: 60%; /* Кнопка "Сохранить" займет 60% ширины контейнера */
+    padding: 10px 20px; /* Отступы внутри кнопки */
+    display: inline-block;
+    text-align: center;
+    border-radius: 5px;
+    background-color: #00A1DB; /* Синий цвет для кнопки "Сохранить" */
+    border: none; /* Убираем границу */
+    color: white;
+    transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover {
+    background-color: #0088B9;
+}
+
+.btn-secondary {
+    background-color: #00A1DB;
+    border: none;
+    color: white;
+    opacity: 0.8;
+}
+
+.btn-secondary:hover {
+    background-color: #0088B9;
+    opacity: 1;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    color: #003366;
+}
+
+.star {
+    font-size: 40px;
+    cursor: pointer;
+    color: #ccc;
+    transition: color 0.3s;
+}
+
+.star:hover,
+.star.hovered,
+.star.selected,
+.star.selected ~ .star {
+    color: #00A1DB;
+}
+
+#rating-value {
+    margin-left: 15px;
+    font-size: 20px;
+    color: #003366;
+}
+
+#close-preview {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #00A1DB;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10;
+}
+
+#close-preview:hover {
+    background: #0088B9;
+}
+
+/* Восстановленная оригинальная кнопка загрузки файла */
+.file-upload-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border: 2px solid #004080;
+    border-radius: 10px;
+    background: #0088B9;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    position: relative;
+}
+
+.file-upload-container:hover {
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+
+.file-upload-container img {
+    width: 24px;
+    height: 24px;
+    filter: brightness(0) invert(1);
+    pointer-events: none;
+}
+
+.file-upload-container input {
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+}
+
+.preview-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 300px;
+    height: 300px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #00A1DB;
+    position: relative;
+    overflow: hidden;
+}
+
+.preview-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.preview-container:hover img {
+    transform: scale(1.05);
+}
+
+button[type="cancel"] {
+    width: 35%; /* Кнопка "Отмена" займет оставшиеся 35% */
+    margin-left: 10px; /* Отступ слева */
+    text-decoration: none; /* Убираем подчеркивание у ссылки */
+    background-color: #f44336; /* Красный цвет для кнопки "Отмена" */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    display: inline-block;
+    text-align: center;
+    cursor: pointer;
+}
+
+button[type="cancel"]:hover {
+    background-color: #d32f2f; /* Темный красный при наведении */
+}
+
+/* Обычные стили для кнопок */
+.container .btn {
+    box-sizing: border-box; /* Чтобы отступы не выходили за пределы контейнера */
+    margin-bottom: 10px; /* Отступ снизу для обеих кнопок */
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px; /* Отступ между кнопками */
+}
+

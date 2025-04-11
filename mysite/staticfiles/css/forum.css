@@ -1,0 +1,79 @@
+.message-card {
+    border-left: 3px solid #0d6efd;
+    transition: all 0.2s ease;
+}
+
+.message-card:hover {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.replies .message-card {
+    border-left-color: #6c757d;
+    margin-top: 1rem;
+}
+
+.reply-form {
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.vote-form {
+    display: inline-block;
+}
+
+.btn-sm {
+    min-width: 65px;
+}
+/* Стили для цитаты */
+.reply-quote {
+    border-left: 3px solid #6c757d;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+}
+
+.reply-quote-author {
+    font-weight: bold;
+    font-size: 0.85rem;
+    color: #495057;
+}
+
+.reply-quote-content {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+/* Анимация появления ответа */
+.replies > .message-card {
+    transition: opacity 0.3s ease;
+}
+/* Стили для цитаты родительского сообщения */
+.parent-message {
+    border-left: 3px solid #6c757d;
+    background-color: #f8f9fa;
+}
+
+/* Отступы для ответов */
+.replies {
+    border-left: 2px solid #dee2e6;
+    padding-left: 1rem;
+}
+
+/* Стили для формы ответа */
+.reply-form {
+    transition: all 0.3s ease;
+}
+
+/* Анимация появления нового сообщения */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.message-card {
+    animation: fadeIn 0.3s ease forwards;
+}

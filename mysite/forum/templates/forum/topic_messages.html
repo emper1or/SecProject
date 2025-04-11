@@ -16,16 +16,55 @@
     </div>
     {% endif %}
 
-    <!-- Контейнер для сообщений форума -->
     <div class="forum-messages mb-5" id="messages-container">
-        {% for forum_message in forum_messages %}
-            {% include 'forum/message.html' with message=forum_message %}
-        {% empty %}
-            <div class="alert alert-info">Пока нет сообщений в этой теме. Будьте первым!</div>
-        {% endfor %}
-    </div>
+    {% for forum_message in paginated_messages %}
+        {% include 'forum/message.html' with message=forum_message %}
+    {% empty %}
+        <div class="alert alert-info">Пока нет сообщений в этой теме. Будьте первым!</div>
+    {% endfor %}
+</div>
 
-    <!-- Форма нового сообщения -->
+<!-- Добавьте пагинацию после блока сообщений -->
+{% if paginated_messages.paginator.num_pages > 1 %}
+<nav aria-label="Messages pagination">
+    <ul class="pagination justify-content-center">
+        {% if paginated_messages.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1" aria-label="First">
+                <span aria-hidden="true">&laquo;&laquo;</span>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ paginated_messages.previous_page_number }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {% endif %}
+
+        {% for num in paginated_messages.paginator.page_range %}
+            {% if paginated_messages.number == num %}
+            <li class="page-item active"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+            {% elif num > paginated_messages.number|add:'-3' and num < paginated_messages.number|add:'3' %}
+            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+            {% endif %}
+        {% endfor %}
+
+        {% if paginated_messages.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ paginated_messages.next_page_number }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ paginated_messages.paginator.num_pages }}" aria-label="Last">
+                <span aria-hidden="true">&raquo;&raquo;</span>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
     {% if user.is_authenticated %}
     <div class="card">
         <div class="card-header">
@@ -77,188 +116,272 @@ function saveVoteToLocalStorage(messageId, voteType) {
     localStorage.setItem('forumVotes', JSON.stringify(votes));
 }
 
-// Восстановление голосов при загрузке страницы
-document.addEventListener('DOMContentLoaded', function() {
-    if (!localStorage.getItem('forumVotes')) return;
+// Обработка голосования
+async function handleVote(messageId, voteType) {
+    const currentPage = new URLSearchParams(window.location.search).get('page') || 1;
+    const csrfToken = getCookie('csrftoken');
+    const form = document.querySelector(`.vote-form[data-message-id="${messageId}"]`);
 
-    const votes = JSON.parse(localStorage.getItem('forumVotes'));
-    Object.keys(votes).forEach(messageId => {
-        const form = document.querySelector(`.vote-form[data-message-id="${messageId}"]`);
-        if (form) {
-            const voteType = votes[messageId];
+    try {
+        const response = await fetch(`/forum/message/${messageId}/vote/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ vote_type: voteType })
+        });
+
+        if (!response.ok) throw new Error('Ошибка сети');
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Обновляем счетчики
+            form.querySelector('.like-count').textContent = data.likes;
+            form.querySelector('.dislike-count').textContent = data.dislikes;
+
+            // Обновляем стили кнопок
             const likeBtn = form.querySelector('.like-btn');
             const dislikeBtn = form.querySelector('.dislike-btn');
 
-            likeBtn.classList.toggle('btn-success', voteType === 'like');
-            likeBtn.classList.toggle('btn-outline-success', voteType !== 'like');
+            likeBtn.classList.toggle('btn-success', data.user_vote === 'like');
+            likeBtn.classList.toggle('btn-outline-success', data.user_vote !== 'like');
 
-            dislikeBtn.classList.toggle('btn-danger', voteType === 'dislike');
-            dislikeBtn.classList.toggle('btn-outline-danger', voteType !== 'dislike');
+            dislikeBtn.classList.toggle('btn-danger', data.user_vote === 'dislike');
+            dislikeBtn.classList.toggle('btn-outline-danger', data.user_vote !== 'dislike');
+
+            // Сохраняем текущий голос
+            saveVoteToLocalStorage(messageId, data.user_vote);
+
+            if (currentPage !== '1') {
+            window.history.replaceState(null, null, `?page=${currentPage}`);
         }
-    });
-});
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Произошла ошибка при голосовании');
+    }
+}
 
-// Обработчик лайков/дизлайков
-document.addEventListener('click', async function(e) {
-    if (e.target.closest('.like-btn, .dislike-btn')) {
-        const btn = e.target.closest('.like-btn, .dislike-btn');
-        const form = btn.closest('.vote-form');
-        const messageId = form.dataset.messageId;
-        const voteType = btn.classList.contains('like-btn') ? 'like' : 'dislike';
-        const csrfToken = getCookie('csrftoken');
+// Улучшенная обработка формы ответа
+async function handleReplyFormSubmit(form) {
+    const formData = new FormData(form);
+    const csrfToken = getCookie('csrftoken');
+    const parentId = formData.get('parent_id');
+    const submitButton = form.querySelector('button[type="submit"]');
 
-        try {
-            const response = await fetch(`/forum/message/${messageId}/vote/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({
-                    vote_type: voteType
-                })
-            });
+    // Блокируем кнопку во избежание повторных отправок
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Отправка...';
 
-            if (!response.ok) throw new Error('Ошибка сети');
+    try {
+        const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
 
-            const data = await response.json();
+        if (!response.ok) throw new Error('Ошибка сети');
 
-            if (data.success) {
-                // Обновляем счетчики
-                form.querySelector('.like-count').textContent = data.likes;
-                form.querySelector('.dislike-count').textContent = data.dislikes;
+        const data = await response.json();
 
-                // Обновляем стили кнопок
+        if (data.success) {
+            const parentElement = document.getElementById(`message-${parentId}`);
+            let repliesContainer = parentElement.querySelector('.replies-container');
+
+            // Создаем контейнер для ответов, если его нет
+            if (!repliesContainer) {
+                repliesContainer = document.createElement('div');
+                repliesContainer.className = 'replies-container ms-4 mt-2 border-start ps-3';
+                parentElement.appendChild(repliesContainer);
+            }
+
+            // Добавляем новый ответ
+            repliesContainer.insertAdjacentHTML('beforeend', data.html);
+            const newMessage = repliesContainer.lastElementChild;
+
+            // Анимация появления
+            newMessage.style.opacity = '0';
+            newMessage.style.transition = 'opacity 0.3s';
+            setTimeout(() => {
+                newMessage.style.opacity = '1';
+            }, 10);
+
+            // Сбрасываем и скрываем форму
+            form.reset();
+            form.style.display = 'none';
+
+            // Прокручиваем к новому ответу
+            newMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            return true;
+        } else {
+            alert(data.error || 'Ошибка при отправке ответа');
+            return false;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Произошла ошибка при отправке ответа');
+        return false;
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Отправить';
+    }
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    // Восстановление голосов из localStorage
+    if (localStorage.getItem('forumVotes')) {
+        const votes = JSON.parse(localStorage.getItem('forumVotes'));
+        Object.keys(votes).forEach(messageId => {
+            const form = document.querySelector(`.vote-form[data-message-id="${messageId}"]`);
+            if (form) {
+                const voteType = votes[messageId];
                 const likeBtn = form.querySelector('.like-btn');
                 const dislikeBtn = form.querySelector('.dislike-btn');
 
-                likeBtn.classList.toggle('btn-success', data.user_vote === 'like');
-                likeBtn.classList.toggle('btn-outline-success', data.user_vote !== 'like');
+                likeBtn.classList.toggle('btn-success', voteType === 'like');
+                likeBtn.classList.toggle('btn-outline-success', voteType !== 'like');
 
-                dislikeBtn.classList.toggle('btn-danger', data.user_vote === 'dislike');
-                dislikeBtn.classList.toggle('btn-outline-danger', data.user_vote !== 'dislike');
-
-                // Сохраняем в localStorage
-                saveVoteToLocalStorage(messageId, data.user_vote);
+                dislikeBtn.classList.toggle('btn-danger', voteType === 'dislike');
+                dislikeBtn.classList.toggle('btn-outline-danger', voteType !== 'dislike');
             }
-        } catch (error) {
-            console.error('Ошибка:', error);
-            alert('Произошла ошибка при голосовании');
-        }
-    }
-});
-
-// Обработчик кнопок "Ответить"
-document.addEventListener('click', function(e) {
-    // Показать/скрыть форму ответа
-    if (e.target.closest('.reply-btn')) {
-        const btn = e.target.closest('.reply-btn');
-        const messageId = btn.dataset.messageId;
-        const replyForm = document.getElementById(`reply-form-${messageId}`);
-
-        // Скрываем все другие формы ответов
-        document.querySelectorAll('.reply-form').forEach(form => {
-            if (form.id !== `reply-form-${messageId}`) form.style.display = 'none';
         });
+    }
+    // Добавьте этот код в обработчик DOMContentLoaded
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.page-link') && !e.target.closest('.page-link').hasAttribute('data-ajax')) {
+            e.preventDefault();
+            const pageUrl = e.target.closest('.page-link').getAttribute('href');
+            loadMessages(pageUrl);
+        }
+    });
 
-        // Показываем/скрываем текущую форму
-        replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
+    async function loadMessages(url) {
+        try {
+            const response = await fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
 
-        // Плавная прокрутка к форме
-        if (replyForm.style.display === 'block') {
-            replyForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            if (!response.ok) throw new Error('Network error');
+
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // Обновляем только нужные части страницы
+            document.getElementById('messages-container').innerHTML =
+                doc.getElementById('messages-container').innerHTML;
+
+            const newPagination = doc.querySelector('.pagination');
+            if (newPagination) {
+                document.querySelector('.pagination').outerHTML = newPagination.outerHTML;
+            }
+
+            // Прокрутка вверх после загрузки
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Обновляем URL без перезагрузки
+            window.history.pushState(null, null, url);
+        } catch (error) {
+            console.error('Error:', error);
+            window.location.href = url; // Fallback к обычной загрузке
         }
     }
 
-    // Отмена ответа
-    if (e.target.closest('.cancel-reply')) {
-        e.target.closest('.reply-form').style.display = 'none';
-    }
-});
+    // Обработка кнопок назад/вперед браузера
+    window.addEventListener('popstate', function() {
+        loadMessages(window.location.href);
+    });
 
-// Обработчик отправки всех форм
-document.addEventListener('submit', async function(e) {
-    e.preventDefault();
+    // Обработчик для кнопок голосования
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.like-btn')) {
+            e.preventDefault();
+            const messageId = e.target.closest('.vote-form').dataset.messageId;
+            handleVote(messageId, 'like');
+        }
 
-    // Обработка основной формы нового сообщения
-    if (e.target.id === 'main-message-form') {
-        const form = e.target;
-        const formData = new FormData(form);
-        const csrfToken = getCookie('csrftoken');
+        if (e.target.closest('.dislike-btn')) {
+            e.preventDefault();
+            const messageId = e.target.closest('.vote-form').dataset.messageId;
+            handleVote(messageId, 'dislike');
+        }
+    });
 
-        try {
-            const response = await fetch(form.action, {
+    // Обработчик для кнопок ответа
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.reply-btn')) {
+            e.preventDefault();
+            const messageId = e.target.closest('.reply-btn').dataset.messageId;
+            const replyForm = document.getElementById(`reply-form-${messageId}`);
+
+            // Скрываем все другие формы ответов
+            document.querySelectorAll('.reply-form').forEach(form => {
+                if (form.id !== `reply-form-${messageId}`) form.style.display = 'none';
+            });
+
+            // Переключаем видимость текущей формы
+            replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
+
+            // Фокусируемся на textarea при открытии формы
+            if (replyForm.style.display === 'block') {
+                setTimeout(() => replyForm.querySelector('textarea').focus(), 100);
+            }
+        }
+
+        // Обработчик отмены ответа
+        if (e.target.closest('.cancel-reply')) {
+            e.preventDefault();
+            e.target.closest('.reply-form').style.display = 'none';
+        }
+    });
+
+    // Обработчик отправки формы ответа
+    document.addEventListener('submit', function(e) {
+        if (e.target.closest('.reply-form form')) {
+            e.preventDefault();
+            handleReplyFormSubmit(e.target);
+        }
+
+        // Обработчик основной формы сообщения
+        if (e.target.id === 'main-message-form') {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const csrfToken = getCookie('csrftoken');
+            const submitButton = form.querySelector('button[type="submit"]');
+
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Отправка...';
+
+            fetch(form.action, {
                 method: 'POST',
                 body: formData,
                 headers: {
                     'X-CSRFToken': csrfToken
                 }
-            });
-
-            if (response.ok) {
-                window.location.reload();
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Ошибка при отправке сообщения');
-        }
-        return;
-    }
-
-    // Обработка формы ответа
-    if (e.target.closest('.ajax-reply-form')) {
-        const form = e.target.closest('.ajax-reply-form');
-        const formData = new FormData(form);
-        const parentId = formData.get('parent_id');
-        const csrfToken = getCookie('csrftoken');
-
-        try {
-            const response = await fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': csrfToken
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ошибка при отправке сообщения');
+            })
+            .finally(() => {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Отправить';
             });
-
-            const data = await response.json();
-
-            if (data.success) {
-                const parentElement = document.getElementById(`message-${parentId}`);
-                let repliesContainer = parentElement.nextElementSibling;
-
-                // Создаем контейнер для ответов если его нет
-                if (!repliesContainer || !repliesContainer.classList.contains('replies')) {
-                    repliesContainer = document.createElement('div');
-                    repliesContainer.className = 'replies ms-4 mt-2';
-                    parentElement.parentNode.insertBefore(repliesContainer, parentElement.nextSibling);
-                }
-
-                // Добавляем ответ с анимацией
-                repliesContainer.insertAdjacentHTML('beforeend', data.html);
-                const newMessage = repliesContainer.lastElementChild;
-                newMessage.style.opacity = 0;
-
-                setTimeout(() => {
-                    newMessage.style.opacity = 1;
-                }, 10);
-
-                // Сбрасываем и скрываем форму
-                form.reset();
-                form.style.display = 'none';
-
-                // Прокручиваем к новому ответу
-                newMessage.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'nearest'
-                });
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Ошибка при отправке ответа');
         }
-    }
+    });
 });
 </script>
 {% endblock %}
