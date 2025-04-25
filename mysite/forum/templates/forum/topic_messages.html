@@ -253,7 +253,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    // Добавьте этот код в обработчик DOMContentLoaded
     document.addEventListener('click', function(e) {
         if (e.target.closest('.page-link') && !e.target.closest('.page-link').hasAttribute('data-ajax')) {
             e.preventDefault();

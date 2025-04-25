@@ -46,3 +46,16 @@ class CustomUser(AbstractUser):
         self.verification_code_sent_at = None
         self.save()
 
+
+class LoginAttempt(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='login_attempts')
+    ip_address = models.GenericIPAddressField()
+    attempts = models.PositiveIntegerField(default=0)
+    last_attempt = models.DateTimeField(auto_now=True)
+    locked_until = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('user', 'ip_address')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.ip_address} - {self.attempts} attempts"

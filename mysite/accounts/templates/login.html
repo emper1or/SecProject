@@ -75,6 +75,21 @@
             .card {
                 width: 420px;  /* Увеличена ширина карточки */
             }
+            .lockout-message {
+                color: #e74c3c;
+                text-align: center;
+                margin-top: 1rem;
+                font-weight: bold;
+            }
+            .lockout-timer {
+                text-align: center;
+                font-size: 1.2rem;
+                margin-top: 0.5rem;
+            }
+            .btn-submit:disabled {
+                background-color: #cccccc;
+                cursor: not-allowed;
+            }
         </style>
     </head>
 
@@ -87,28 +102,36 @@
                     <div class="alert alert-danger" role="alert">{{ error }}</div>
                 {% endif %}
 
-                <form method="post" class="needs-validation" novalidate>
+                <form method="post" class="needs-validation" novalidate id="loginForm">
                     {% csrf_token %}
                     
                     <!-- Имя пользователя -->
                     <div class="form-field">
                         <label for="username" class="form-label">Имя пользователя</label>
-                        <input type="text" class="form-input" id="username" name="username" value="{{ username_value|default_if_none:'' }}" required>
+                        <input type="text" class="form-input" id="username" name="username" value="{{ username_value|default_if_none:'' }}" required {% if is_locked %}disabled{% endif %}>
                     </div>
                     
                     <!-- Пароль -->
                     <div class="form-field">
-
                         <label for="password" class="form-label">Пароль</label>
                         <div class="input-wrapper">
-                            <input type="password" class="form-input" id="password" name="password" required>
+                            <input type="password" class="form-input" id="password" name="password" required {% if is_locked %}disabled{% endif %}>
                             <span class="position-absolute top-50 end-0 translate-middle-y me-3" style="cursor: pointer; z-index: 5;">
                             <i class="fas fa-eye text-muted" onclick="togglePassword('password', this)"></i>
                             </span>
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-submit">Войти</button>
+                    <button type="submit" class="btn-submit" {% if is_locked %}disabled{% endif %}>Войти</button>
+                    
+                    {% if is_locked %}
+                        <div class="lockout-message">
+                            Превышено количество попыток входа
+                        </div>
+                        <div class="lockout-timer" id="lockoutTimer">
+                            До следующей попытки: <span id="timeRemaining"></span>
+                        </div>
+                    {% endif %}
                 </form>
                 
                 <div class="login-links">
@@ -135,5 +158,40 @@
             // Фокус обратно на input после клика на иконку
             input.focus();
         }
+
+        // Таймер обратного отсчета
+        {% if is_locked %}
+            const lockedUntil = new Date("{{ locked_until|date:'Y-m-d H:i:s' }}").getTime();
+            
+            function updateTimer() {
+                const now = new Date().getTime();
+                const distance = lockedUntil - now;
+                
+                if (distance <= 0) {
+                    document.getElementById('lockoutTimer').style.display = 'none';
+                    document.querySelector('.lockout-message').textContent = 'Теперь вы можете попробовать снова';
+                    document.getElementById('loginForm').querySelectorAll('input, button').forEach(el => {
+                        el.disabled = false;
+                    });
+                    document.querySelector('.btn-submit').disabled = false;
+                    return;
+                }
+                
+                // Вычисляем часы, минуты и секунды
+                const hours = Math.floor(distance / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                let timeString = '';
+                if (hours > 0) timeString += `${hours} ч `;
+                if (minutes > 0 || hours > 0) timeString += `${minutes} мин `;
+                timeString += `${seconds} сек`;
+                
+                document.getElementById('timeRemaining').textContent = timeString;
+            }
+            
+            updateTimer();
+            const timerInterval = setInterval(updateTimer, 1000);
+        {% endif %}
     </script>
 {% endblock %}

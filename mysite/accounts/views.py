@@ -13,6 +13,7 @@ from library.models import Book, BookCover
 from django.http import JsonResponse
 import random
 from .forms import RegisterForm, VerificationForm, ResetPasswordForm, PasswordChangeForm, UserEditForm
+from .models import LoginAttempt
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -77,13 +78,61 @@ def register(request):
         return render(request, 'register.html', {'form': form})
 
 
+from datetime import datetime, timedelta
+from django.core.cache import cache
+
+
+def get_lockout_time(attempts):
+    """Возвращает время блокировки в зависимости от количества попыток"""
+    lockout_times = {
+        3: timedelta(seconds=30),
+        6: timedelta(minutes=1),
+        9: timedelta(minutes=5),
+        12: timedelta(minutes=15),
+        15: timedelta(minutes=30),
+        18: timedelta(hours=1),
+        21: timedelta(hours=5),
+    }
+
+    # Находим максимальный порог, который был превышен
+    applicable_thresholds = [th for th in lockout_times.keys() if attempts >= th]
+    if not applicable_thresholds:
+        return None
+
+    max_threshold = max(applicable_thresholds)
+    return lockout_times[max_threshold]
+
+
 @user_passes_test(anonymous_required, login_url='home')
 def login_view(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
+        ip_address = request.META.get('REMOTE_ADDR')
+
+        # Проверяем блокировку
+        cache_key = f"login_lockout_{username}_{ip_address}"
+        locked_until = cache.get(cache_key)
+
+        if locked_until:
+            if timezone.now() < locked_until:
+                remaining_time = locked_until - timezone.now()
+                return render(request, 'login.html', {
+                    'error': f'Превышено количество попыток. Попробуйте снова через {int(remaining_time.total_seconds())} секунд.',
+                    'username_value': username,
+                    'is_locked': True,
+                    'locked_until': locked_until
+                })
+            else:
+                cache.delete(cache_key)
+
         user = authenticate(request, username=username, password=password)
+
         if user is not None:
+            # Сброс счетчика попыток при успешной аутентификации
+            LoginAttempt.objects.filter(user=user, ip_address=ip_address).delete()
+            cache.delete(cache_key)
+
             user.verification_code = generate_verification_code()
             user.verification_attempts = 0
             user.verification_code_sent_at = timezone.now()
@@ -92,8 +141,43 @@ def login_view(request):
             request.session['user_id'] = user.id
             return redirect('verify')
         else:
-            return render(request, 'login.html',
-                          {'error': 'Неверное имя пользователя или пароль', 'username_value': username})
+            # Увеличиваем счетчик попыток
+            user = User.objects.filter(username=username).first()
+            if user:
+                attempt, created = LoginAttempt.objects.get_or_create(
+                    user=user,
+                    ip_address=ip_address,
+                    defaults={'attempts': 1, 'last_attempt': timezone.now()}
+                )
+                if not created:
+                    attempt.attempts += 1
+                    attempt.last_attempt = timezone.now()
+                    attempt.save()
+
+                # Проверяем, нужно ли блокировать
+                lockout_duration = get_lockout_time(attempt.attempts)
+                if lockout_duration:
+                    locked_until = timezone.now() + lockout_duration
+                    attempt.locked_until = locked_until
+                    attempt.save()
+                    cache.set(cache_key, locked_until, timeout=int(lockout_duration.total_seconds()))
+
+                    return render(request, 'login.html', {
+                        'error': f'Неверное имя пользователя или пароль. Превышено количество попыток. Попробуйте снова через {int(lockout_duration.total_seconds())} секунд.',
+                        'username_value': username,
+                        'is_locked': True,
+                        'locked_until': locked_until
+                    })
+                else:
+                    return render(request, 'login.html', {
+                        'error': f'Неверное имя пользователя или пароль. Попыток: {attempt.attempts}/3',
+                        'username_value': username
+                    })
+
+            return render(request, 'login.html', {
+                'error': 'Неверное имя пользователя или пароль',
+                'username_value': username
+            })
     else:
         return render(request, 'login.html')
 
@@ -260,11 +344,13 @@ def reset_password(request):
                 user.set_password(new_password)
                 user.verification_code = None
                 user.save()
+
+                # Сбрасываем все блокировки для этого пользователя
+                LoginAttempt.objects.filter(user=user).delete()
                 messages.success(request, 'Пароль успешно изменён! Теперь вы можете войти с новым паролем.')
                 return redirect('login')
             else:
                 form.add_error('verification_code', 'Неверный код подтверждения.')
-                print('123')
     else:
         form = ResetPasswordForm()
 
