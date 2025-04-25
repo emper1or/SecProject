@@ -68,6 +68,37 @@
                 color: #3498db;
                 text-decoration: none;
             }
+            /* Стили для валидации */
+            .valid-feedback {
+                color: #28a745;
+                display: none;
+                font-size: 0.875rem;
+                margin-top: 0.25rem;
+            }
+            .invalid-feedback {
+                color: #dc3545;
+                display: none;
+                font-size: 0.875rem;
+                margin-top: 0.25rem;
+            }
+            .is-valid {
+                border-color: #28a745;
+            }
+            .is-invalid {
+                border-color: #dc3545;
+            }
+            .password-strength {
+                margin-top: 0.5rem;
+                height: 5px;
+                background-color: #e9ecef;
+                border-radius: 3px;
+                overflow: hidden;
+            }
+            .password-strength-bar {
+                height: 100%;
+                width: 0%;
+                transition: width 0.3s ease;
+            }
         </style>
     </head>
     
@@ -76,7 +107,7 @@
             <div class="form-container">
                 <h1 class="form-title">Регистрация</h1>
 
-                <form method="post" class="needs-validation" novalidate>
+                <form method="post" class="needs-validation" novalidate id="registration-form">
                     {% csrf_token %}
                     
                     <!-- Имя пользователя -->
@@ -84,18 +115,18 @@
                         <label for="{{ form.username.id_for_label }}" class="form-label">Имя пользователя</label>
                         <input type="text" class="form-input" id="{{ form.username.id_for_label }}" name="{{ form.username.name }}" required>
                         <p class="help-text">Не более 150 символов. Только буквы, цифры и @/./+/-/_</p>
-                        {% for error in form.username.errors %}
-                              <div class="alert alert-danger" role="alert">{{ error }}</div>
-                        {% endfor %}
+                        <div class="valid-feedback" id="username-valid">Имя пользователя доступно!</div>
+                        <div class="invalid-feedback" id="username-invalid"></div>
+                        <div id="username-errors" class="text-danger"></div>
                     </div>
                     
                     <!-- Почта -->
                     <div class="form-field">
                         <label for="{{ form.email.id_for_label }}" class="form-label">Почта</label>
                         <input type="email" class="form-input" id="{{ form.email.id_for_label }}" name="{{ form.email.name }}" required>
-                        {% for error in form.email.errors %}
-                            <div class="alert alert-danger" role="alert">{{ error }}</div>
-                        {% endfor %}
+                        <div class="valid-feedback" id="email-valid">Почта доступна!</div>
+                        <div class="invalid-feedback" id="email-invalid"></div>
+                        <div id="email-errors" class="text-danger"></div>
                     </div>
                     
                     <!-- Пароль -->
@@ -107,10 +138,13 @@
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
+                        <div class="password-strength">
+                            <div class="password-strength-bar" id="password-strength-bar"></div>
+                        </div>
+                        <div class="valid-feedback" id="password1-valid">Пароль соответствует требованиям!</div>
+                        <div class="invalid-feedback" id="password1-invalid"></div>
                         <p class="help-text">Ваш пароль должен содержать не менее 8 символов. Ваш пароль не может состоять только из цифр.</p>
-                        {% for error in form.password1.errors %}
-                            <div class="alert alert-danger" role="alert">{{ error }}</div>
-                        {% endfor %}
+                        <div id="password1-errors" class="text-danger"></div>
                     </div>
                     
                     <!-- Подтверждение пароля -->
@@ -122,13 +156,13 @@
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
+                        <div class="valid-feedback" id="password2-valid">Пароли совпадают!</div>
+                        <div class="invalid-feedback" id="password2-invalid"></div>
                         <p class="help-text">Повторите пароль для подтверждения.</p>
-                        {% for error in form.password2.errors %}
-                            <div class="alert alert-danger" role="alert">{{ error }}</div>
-                        {% endfor %}
+                        <div id="password2-errors" class="text-danger"></div>
                     </div>
 
-                    <button type="submit" class="btn-submit">Зарегистрироваться</button>
+                    <button type="submit" class="btn-submit" id="submit-btn">Зарегистрироваться</button>
                 </form>
                 
                 <div class="login-link">
@@ -151,5 +185,226 @@
                 icon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         }
+
+        // Функция для проверки сложности пароля
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            
+            // Длина пароля
+            if (password.length >= 8) strength += 1;
+            if (password.length >= 12) strength += 1;
+            
+            // Содержит буквы в разных регистрах
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 1;
+            
+            // Содержит цифры
+            if (/\d/.test(password)) strength += 1;
+            
+            // Содержит специальные символы
+            if (/[^a-zA-Z0-9]/.test(password)) strength += 1;
+            
+            return strength;
+        }
+
+        // Функция для обновления индикатора сложности пароля
+        function updatePasswordStrength(password) {
+            const strength = checkPasswordStrength(password);
+            const strengthBar = document.getElementById('password-strength-bar');
+            
+            // Очищаем классы
+            strengthBar.className = 'password-strength-bar';
+            
+            if (password.length === 0) {
+                strengthBar.style.width = '0%';
+                strengthBar.style.backgroundColor = '#e9ecef';
+                return;
+            }
+            
+            if (strength <= 2) {
+                strengthBar.style.width = '33%';
+                strengthBar.style.backgroundColor = '#dc3545';
+                strengthBar.classList.add('weak');
+            } else if (strength <= 4) {
+                strengthBar.style.width = '66%';
+                strengthBar.style.backgroundColor = '#ffc107';
+                strengthBar.classList.add('medium');
+            } else {
+                strengthBar.style.width = '100%';
+                strengthBar.style.backgroundColor = '#28a745';
+                strengthBar.classList.add('strong');
+            }
+        }
+
+        // AJAX валидация имени пользователя
+        document.getElementById('{{ form.username.id_for_label }}').addEventListener('blur', function() {
+            const username = this.value;
+            const validFeedback = document.getElementById('username-valid');
+            const invalidFeedback = document.getElementById('username-invalid');
+            const errorContainer = document.getElementById('username-errors');
+            
+            errorContainer.innerHTML = '';
+            
+            if (username.length < 3) {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+                validFeedback.style.display = 'none';
+                invalidFeedback.style.display = 'block';
+                invalidFeedback.textContent = 'Имя пользователя должно содержать не менее 3 символов';
+                return;
+            }
+            
+            fetch('/accounts/validate_username/?username=' + encodeURIComponent(username))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.is_valid) {
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                        validFeedback.style.display = 'block';
+                        invalidFeedback.style.display = 'none';
+                    } else {
+                        this.classList.remove('is-valid');
+                        this.classList.add('is-invalid');
+                        validFeedback.style.display = 'none';
+                        invalidFeedback.style.display = 'block';
+                        invalidFeedback.textContent = data.error || 'Имя пользователя уже занято';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+
+        // AJAX валидация email
+        document.getElementById('{{ form.email.id_for_label }}').addEventListener('blur', function() {
+            const email = this.value;
+            const validFeedback = document.getElementById('email-valid');
+            const invalidFeedback = document.getElementById('email-invalid');
+            const errorContainer = document.getElementById('email-errors');
+            
+            errorContainer.innerHTML = '';
+            
+            // Простая проверка формата email
+            if (!email.includes('@') || !email.includes('.')) {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+                validFeedback.style.display = 'none';
+                invalidFeedback.style.display = 'block';
+                invalidFeedback.textContent = 'Введите корректный email';
+                return;
+            }
+            
+            fetch('/accounts/validate_email/?email=' + encodeURIComponent(email))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.is_valid) {
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                        validFeedback.style.display = 'block';
+                        invalidFeedback.style.display = 'none';
+                    } else {
+                        this.classList.remove('is-valid');
+                        this.classList.add('is-invalid');
+                        validFeedback.style.display = 'none';
+                        invalidFeedback.style.display = 'block';
+                        invalidFeedback.textContent = data.error || 'Email уже используется';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+
+        // Валидация пароля в реальном времени
+        document.getElementById('{{ form.password1.id_for_label }}').addEventListener('input', function() {
+            const password = this.value;
+            const validFeedback = document.getElementById('password1-valid');
+            const invalidFeedback = document.getElementById('password1-invalid');
+            const errorContainer = document.getElementById('password1-errors');
+            
+            errorContainer.innerHTML = '';
+            updatePasswordStrength(password);
+            
+            // Проверка минимальной длины
+            if (password.length < 8) {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+                validFeedback.style.display = 'none';
+                invalidFeedback.style.display = 'block';
+                invalidFeedback.textContent = 'Пароль должен содержать не менее 8 символов';
+                return;
+            }
+            
+            // Проверка, что пароль не состоит только из цифр
+            if (/^\d+$/.test(password)) {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+                validFeedback.style.display = 'none';
+                invalidFeedback.style.display = 'block';
+                invalidFeedback.textContent = 'Пароль не может состоять только из цифр';
+                return;
+            }
+            
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+            validFeedback.style.display = 'block';
+            invalidFeedback.style.display = 'none';
+        });
+
+        // Валидация подтверждения пароля
+        document.getElementById('{{ form.password2.id_for_label }}').addEventListener('input', function() {
+            const password1 = document.getElementById('{{ form.password1.id_for_label }}').value;
+            const password2 = this.value;
+            const validFeedback = document.getElementById('password2-valid');
+            const invalidFeedback = document.getElementById('password2-invalid');
+            const errorContainer = document.getElementById('password2-errors');
+            
+            errorContainer.innerHTML = '';
+            
+            if (password1 !== password2) {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+                validFeedback.style.display = 'none';
+                invalidFeedback.style.display = 'block';
+                invalidFeedback.textContent = 'Пароли не совпадают';
+            } else {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+                validFeedback.style.display = 'block';
+                invalidFeedback.style.display = 'none';
+            }
+        });
+
+        // Обработка отправки формы
+        document.getElementById('registration-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    // Обработка ошибок
+                    Object.keys(data.errors).forEach(field => {
+                        const errorContainer = document.getElementById(`${field}-errors`);
+                        if (errorContainer) {
+                            errorContainer.innerHTML = data.errors[field].join('<br>');
+                        }
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
     </script>
 {% endblock %}
