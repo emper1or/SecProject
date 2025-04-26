@@ -11,7 +11,7 @@ class AuthorForm(forms.ModelForm):
 class BookForm(forms.ModelForm):
     class Meta:
         model = Book
-        fields = ['title', 'description', 'author', 'rating']
+        fields = ['title', 'description', 'author', 'rating', 'review']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

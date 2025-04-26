@@ -7,6 +7,8 @@ from django.http import JsonResponse
 from .forms import BookForm, BookCoverForm
 from .models import Author, Book, BookCover
 
+import requests
+from django.core.files.base import ContentFile
 
 @login_required
 def add_author(request):
@@ -151,6 +153,78 @@ def autocomplete(request):
 def book_detail(request, book_id):
     # Получаем полные данные о книге
     book_data = get_book_details(book_id)
+
+    if request.method == 'POST':
+        # Проверяем наличие автора
+        authors_list = book_data.get('authors', [])
+        if authors_list and authors_list[0]:  # Проверяем, что первый автор существует
+            author_name = authors_list[0]
+            author, created = Author.objects.get_or_create(name=author_name)
+        else:
+            # Создаем "анонимного" автора
+            author, created = Author.objects.get_or_create(name="Неизвестный автор")
+
+        # Проверяем, существует ли книга
+        book, created = Book.objects.get_or_create(
+            title=book_data.get('title'),
+            defaults={
+                'description': book_data.get('description'),
+                'review': '',  # Поле отзыва можно оставить пустым
+                'rating': book_data.get('rating', 0),
+                'author': author,  # Назначаем автора
+            }
+        )
+
+        # Если книга уже существует, обновляем её поля
+        if not created:
+            book.description = book_data.get('description')
+            book.review = ''
+            book.rating = book_data.get('rating', 0)
+            book.author = author  # Обновляем автора
+            book.save()
+
+        # Связываем книгу с текущим пользователем
+        if request.user.is_authenticated:
+            book.users.add(request.user)  # Добавляем пользователя в поле users
+
+        # Сохраняем обложку книги
+        if book_data.get('cover'):
+            # Проверяем, является ли обложка внешней ссылкой
+            cover_url = book_data.get('cover')
+            if cover_url.startswith(('http://', 'https://')):
+                # Скачиваем изображение с внешнего URL
+                response = requests.get(cover_url)
+                if response.status_code == 200:
+                    # Создаем объект BookCover и сохраняем изображение
+                    cover, created = BookCover.objects.get_or_create(book=book)
+                    cover.cover.save(
+                        f"{book.title}_cover.jpg",  # Имя файла
+                        ContentFile(response.content)  # Содержимое файла
+                    )
+                    cover.save()
+            else:
+                # Если это уже локальный файл, сохраняем его напрямую
+                cover, created = BookCover.objects.get_or_create(
+                    book=book,
+                    defaults={'cover': cover_url}
+                )
+                if not created:
+                    cover.cover = cover_url
+                    cover.save()
+
+        # Обновляем рейтинг и отзыв
+        rating = request.POST.get('rating')
+        review = request.POST.get('review')
+
+        if rating:
+            book.rating = int(rating)
+        if review:
+            book.review = review
+
+        book.save()
+
+        return render(request, 'book_details_test.html', {'book': book_data, 'saved': True})
+
     return render(request, 'book_details_test.html', {'book': book_data})
 
 

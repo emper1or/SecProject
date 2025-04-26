@@ -11,69 +11,181 @@
     <div class="book-info">
         <h1>{{ book.title }}</h1>
 
+        <!-- Авторы -->
         <div class="authors">
             <strong>Автор{% if book.authors|length > 1 %}ы{% endif %}:</strong>
-            {% for author in book.authors %}
-                <a href="{% url 'author_detail' author %}" class="author-link">
-                    {{ author }}
-                </a>{% if not forloop.last %}, {% endif %}
-            {% empty %}
-                <span>Автор неизвестен</span>
-            {% endfor %}
+            <span>
+                {% for author in book.authors %}
+                    <a href="{% url 'author_detail' author %}" class="author-link">
+                        {{ author }}
+                    </a>{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                    <span>Автор неизвестен</span>
+                {% endfor %}
+            </span>
         </div>
 
-        <div class="meta">
-            {% if book.published_date %}<span>Год: {{ book.published_date }}</span>{% endif %}
-            {% if book.publisher %}<span>Издатель: {{ book.publisher }}</span>{% endif %}
-            {% if book.page_count %}<span>Страниц: {{ book.page_count }}</span>{% endif %}
-            {% if book.categories %}<span>Жанр: {{ book.categories }}</span>{% endif %}
+        <!-- Год выпуска -->
+        {% if book.published_date %}
+        <div class="meta-item">
+            <strong>Год выпуска:</strong>
+            <span>{{ book.published_date }}</span>
         </div>
+        {% endif %}
 
+        <!-- Издательство -->
+        {% if book.publisher %}
+        <div class="meta-item">
+            <strong>Издательство:</strong>
+            <span>{{ book.publisher }}</span>
+        </div>
+        {% endif %}
+
+        <!-- Количество страниц -->
+        {% if book.page_count %}
+        <div class="meta-item">
+            <strong>Количество страниц:</strong>
+            <span>{{ book.page_count }}</span>
+        </div>
+        {% endif %}
+
+        <!-- Жанр -->
+        {% if book.categories %}
+        <div class="meta-item">
+            <strong>Жанр:</strong>
+            <span>{{ book.categories }}</span>
+        </div>
+        {% endif %}
+
+        <!-- Описание -->
         {% if book.description %}
         <div class="description">
             <h3>Описание</h3>
             <p>{{ book.description }}</p>
         </div>
         {% endif %}
+
+        <!-- Форма для рейтинга и отзыва -->
+        <div class="review-section">
+            <form method="post" class="review-form">
+                {% csrf_token %}
+
+                <!-- Рейтинг -->
+                <fieldset class="mb-4">
+                    <legend class="fs-4">Рейтинг книги</legend>
+                    <label for="rating-slider">Выберите рейтинг:</label>
+                    <input type="range" id="rating-slider" name="rating" min="1" max="10" step="1" value="5" oninput="ratingValue.textContent = this.value">
+                    <span id="ratingValue">5</span> / 10
+                </fieldset>
+
+                <!-- Отзыв -->
+                <fieldset class="mb-4">
+                    <legend class="fs-4">Отзыв о книге</legend>
+                    <textarea id="review-text" name="review" rows="5" placeholder="Напишите ваш отзыв о книге..."></textarea>
+                </fieldset>
+
+                <!-- Кнопка отправки -->
+                <button type="submit" class="btn btn-primary">Сохранить отзыв и рейтинг</button>
+            </form>
+
+            <!-- Сообщение о успешном сохранении -->
+            {% if saved %}
+            <div class="success-message">
+                Отзыв и рейтинг успешно сохранены!
+            </div>
+            {% endif %}
+        </div>
     </div>
+
+    <!-- JavaScript для обновления значения рейтинга -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let ratingSlider = document.getElementById("rating-slider");
+            let ratingValue = document.getElementById("ratingValue");
+
+            ratingSlider.addEventListener("input", function() {
+                ratingValue.textContent = this.value;
+            });
+        });
+    </script>
 </div>
 
 <style>
 .book-detail {
-    display: flex;
-    gap: 30px;
-    max-width: 900px;
+    max-width: 800px;
     margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
 }
+
 .book-cover img {
-    max-height: 400px;
-    box-shadow: 0 12px 15px rgba(0,0,0,0.1);
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
 }
+
 .book-info {
-    flex: 1;
+    margin-top: 20px;
 }
-.authors {
-    margin: 15px 0;
-    font-size: 1.1em;
+
+.authors, .meta-item, .description {
+    margin-bottom: 15px;
 }
-.author-link {
-    color: #1a73e8;
-    text-decoration: none;
-}
-.author-link:hover {
-    text-decoration: underline;
-}
-.meta {
-    margin: 20px 0;
-    color: #666;
-}
-.meta span {
+
+.meta-item strong {
     display: block;
     margin-bottom: 5px;
+    font-weight: bold;
 }
-.description {
-    margin-top: 30px;
-    line-height: 1.6;
+
+.description h3 {
+    margin-bottom: 10px;
+}
+
+.review-section {
+    margin-top: 20px;
+}
+
+.review-form {
+    max-width: 100%;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.review-form fieldset {
+    margin-bottom: 20px;
+}
+
+.review-form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+.review-form button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.review-form button:hover {
+    background-color: #0056b3;
+}
+
+.success-message {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
 }
 </style>
 {% endblock %}

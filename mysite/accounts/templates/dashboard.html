@@ -26,7 +26,16 @@
                                 Не оценено
                             {% endif %}
                         </td>
-                        <td>{{ book.author.name }}</td>
+                        <td>
+                            {% if book.author.name != "Неизвестный автор" %}
+                                <a href="{% url 'author_detail' book.author.name %}" class="author-link">
+                                {{ book.author.name }}
+                            </a>
+                            {% else %}
+                                {{ book.author.name }}
+                            {% endif %}
+
+                        </td>
                         <td>
                             <a href="{% url 'book_details' book.id %}" class="btn btn-info">Подробнее</a>
                             <a href="{% url 'edit_book' book.id %}" class="btn btn-warning">Редактировать</a>
@@ -78,4 +87,11 @@
         <a href="{% url 'add_game' %}" class="btn btn-primary" style="color: #000000;">Добавить игру</a>
     </div>
 </div>
+
+<style>
+.author-link {
+color: inherit; /* Наследует цвет текста родительского элемента */
+text-decoration: none; /* Убирает подчеркивание */
+}
+</style>
 {% endblock %}
