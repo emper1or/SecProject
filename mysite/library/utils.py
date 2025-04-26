@@ -37,7 +37,7 @@ def get_book_suggestions(query):
 def get_book_details(book_id):
     """Получаем детали книги по ID"""
 
-    response = requests.get(f"https://www.googleapis.com/books/v1/volumes/{book_id}")
+    response = requests.get(f"https://www.googleapis.com/books/v1/volumes/{book_id}", params={"key": api_key})
     data = response.json()
     volume_info = data.get('volumeInfo', {})
     return get_info_by_volume_info(volume_info)

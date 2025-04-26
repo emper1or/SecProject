@@ -153,13 +153,15 @@ def autocomplete(request):
 def book_detail(request, book_id):
     # Получаем полные данные о книге
     book_data = get_book_details(book_id)
+    print(book_data)
 
     if request.method == 'POST':
         # Проверяем наличие автора
         authors_list = book_data.get('authors', [])
         if authors_list and authors_list[0]:  # Проверяем, что первый автор существует
             author_name = authors_list[0]
-            author, created = Author.objects.get_or_create(name=author_name)
+            api_data = get_author_info(author_name)
+            author, created = Author.objects.get_or_create(name=author_name, bio=api_data.get('bio'))
         else:
             # Создаем "анонимного" автора
             author, created = Author.objects.get_or_create(name="Неизвестный автор")
