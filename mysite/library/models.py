@@ -15,6 +15,7 @@ class Book(models.Model):
     title = models.CharField(max_length=200, verbose_name="Название книги")
     description = models.TextField(verbose_name="Описание книги", blank=True, null=True)
     author = models.ForeignKey(Author, on_delete=models.CASCADE, verbose_name="Автор")
+    review = models.TextField(verbose_name="Отзыв о книге", blank=True, null=True)
     users = models.ManyToManyField(CustomUser, related_name='books')
     rating = models.IntegerField(default=0, null=True, blank=True)
 

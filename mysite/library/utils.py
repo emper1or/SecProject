@@ -1,10 +1,11 @@
 import requests
+import os
 from django.core.cache import cache
 from django.conf import settings
 import logging
 
 logger = logging.getLogger(__name__)
-
+api_key = os.getenv("GOOGLE_BOOKS_API_KEY")
 
 def get_book_suggestions(query):
     """Получаем подсказки из Google Books API"""
@@ -13,7 +14,8 @@ def get_book_suggestions(query):
         "q": query,
         "langRestrict": "ru",
         "maxResults": 5,
-        "fields": "items(id,volumeInfo/title,volumeInfo/authors)"
+        "fields": "items(id,volumeInfo/title,volumeInfo/authors)",
+        "key": api_key
     }
 
     response = requests.get("https://www.googleapis.com/books/v1/volumes", params=params)
@@ -35,7 +37,7 @@ def get_book_suggestions(query):
 def get_book_details(book_id):
     """Получаем детали книги по ID"""
 
-    response = requests.get(f"https://www.googleapis.com/books/v1/volumes/{book_id}")
+    response = requests.get(f"https://www.googleapis.com/books/v1/volumes/{book_id}", params={"key": api_key})
     data = response.json()
     volume_info = data.get('volumeInfo', {})
     return get_info_by_volume_info(volume_info)
@@ -43,7 +45,7 @@ def get_book_details(book_id):
 
 def get_book_details_isbn(isbn):
     """Получаем детали книги по ISBN"""
-    response = requests.get(f'https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}')
+    response = requests.get(f'https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}', params={"key": api_key})
     data = response.json()
     if data.get('items'):
         volume_info = data["items"][0].get('volumeInfo', {})
@@ -145,7 +147,8 @@ def get_googlebooks_author_info(author_name):
         params = {
             "q": f"inauthor:{author_name}",
             "maxResults": 40,
-            "langRestrict": "ru"
+            "langRestrict": "ru",
+            "key": api_key
         }
 
         if hasattr(settings, 'GOOGLE_BOOKS_API_KEY'):

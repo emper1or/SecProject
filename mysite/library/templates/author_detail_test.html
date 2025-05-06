@@ -27,7 +27,7 @@
     <div class="author-bio">
         {% if author.bio %}
             <h3>Биография</h3>
-            <p>{{ author.bio }}</p>
+            <p>{{ author.bio|safe}}</p>
         {% else %}
             <p class="text-muted">Биография автора пока недоступна.</p>
         {% endif %}

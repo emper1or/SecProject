@@ -22,29 +22,7 @@
                 {% endif %}
             </div>
 
-            <!-- Рейтинг -->
-            <div class="mb-3">
-                <label for="{{ book_form.rating.id_for_label }}" class="form-label">Рейтинг:</label>
-                <input type="number" class="form-control rounded-pill border-primary shadow-sm"
-                       id="{{ book_form.rating.id_for_label }}" name="{{ book_form.rating.name }}"
-                       value="{{ book_form.rating.value }}" step="1" min="0" max="10">
-                {% if book_form.rating.errors %}
-                    <div class="text-danger small">{{ book_form.rating.errors }}</div>
-                {% endif %}
-            </div>
-
-            <!-- Описание -->
-            <div class="mb-3">
-                <label for="{{ book_form.description.id_for_label }}" class="form-label">Описание:</label>
-                <textarea class="form-control rounded border-primary shadow-sm"
-                          id="{{ book_form.description.id_for_label }}" name="{{ book_form.description.name }}"
-                          rows="4">{{ book_form.description.value }}</textarea>
-                {% if book_form.description.errors %}
-                    <div class="text-danger small">{{ book_form.description.errors }}</div>
-                {% endif %}
-            </div>
-
-                            <!-- Автор -->
+            <!-- Автор -->
                             <div class="mb-3">
                     <label for="{{ book_form.author.id_for_label }}" class="form-label">Автор:</label>
                     <select name="{{ book_form.author.name }}" id="{{ book_form.author.id_for_label }}"
@@ -60,6 +38,42 @@
                     {% endif %}
                 </div>
 
+            <!-- Описание -->
+            <div class="mb-3">
+                <label for="{{ book_form.description.id_for_label }}" class="form-label">Описание:</label>
+                <textarea class="form-control rounded border-primary shadow-sm"
+                          id="{{ book_form.description.id_for_label }}" name="{{ book_form.description.name }}"
+                          rows="4">{{ book_form.description.value }}</textarea>
+                {% if book_form.description.errors %}
+                    <div class="text-danger small">{{ book_form.description.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Отзыв -->
+            <div class="mb-3">
+                <label for="{{ book_form.review.id_for_label }}" class="form-label">Отзыв:</label>
+                <textarea class="form-control rounded border-primary shadow-sm"
+                          id="{{ book_form.review.id_for_label }}" name="{{ book_form.review.name }}"
+                          rows="4">{{ book_form.review.value }}</textarea>
+                {% if book_form.review.errors %}
+                    <div class="text-danger small">{{ book_form.review.errors }}</div>
+                {% endif %}
+            </div>
+
+             <!-- Рейтинг -->
+            <div class="mb-3">
+                <label for="{{ book_form.rating.id_for_label }}" class="form-label">Рейтинг:</label>
+                <input type="number" class="form-control rounded-pill border-primary shadow-sm"
+                       id="{{ book_form.rating.id_for_label }}" name="{{ book_form.rating.name }}"
+                       value="{{ book_form.rating.value }}" step="1" min="0" max="10">
+                {% if book_form.rating.errors %}
+                    <div class="text-danger small">{{ book_form.rating.errors }}</div>
+                {% endif %}
+            </div>
+
+
+
+
             <!-- Обложка -->
             <div class="mb-3 text-center">
                 <label for="{{ cover_form.cover.id_for_label }}" class="form-label">Обложка:</label>
@@ -74,7 +88,9 @@
                     {% endwith %}
                 </div>
                 <input type="file" class="form-control rounded-pill border-primary shadow-sm"
-                       name="{{ cover_form.cover.name }}" id="{{ cover_form.cover.id_for_label }}">
+                       name="{{ cover_form.cover.name }}" id="{{ cover_form.cover.id_for_label }}"
+                         accept="image/jpeg, image/png, image/gif"
+                        onchange="validateFile(this)">
                 {% if cover_form.cover.errors %}
                     <div class="text-danger small">{{ cover_form.cover.errors }}</div>
                 {% endif %}
@@ -88,4 +104,18 @@
         </form>
     </div>
 </div>
+
+<script>
+    function validateFile(input) {
+    const maxFileSize = 2 * 1024 * 1024; // 2 MB
+    const file = input.files[0];
+
+    if (file) {
+        if (file.size > maxFileSize) {
+            alert(`Размер файла превышает допустимый лимит (${maxFileSize / (1024 * 1024)} МБ).`);
+            input.value = ''; // Очищаем выбор файла
+        }
+    }
+}
+</script>
 {% endblock %}
