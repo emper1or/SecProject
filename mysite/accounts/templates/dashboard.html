@@ -1,97 +1,100 @@
 {% extends 'index.html' %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-5 ultra-tab-interface">
     <h1 class="text-center mb-4">Личная библиотека</h1>
 
-    <h2 class="text-center mb-4">Ваши книги:</h2>
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover" style="color: #ffffff;">
-            <thead class="table-dark">
-                <tr>
-                    <th scope="col">Название</th>
-                    <th scope="col">Рейтинг</th>
-                    <th scope="col">Автор</th>
-                    <th scope="col">Действия</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for book in books %}
-                    <tr>
-                        <td>{{ book.title }}</td>
-                        <td>
-                            {% if book.rating %}
-                                {{ book.rating }}/10
-                            {% else %}
-                                Не оценено
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if book.author.name != "Неизвестный автор" %}
-                                <a href="{% url 'author_detail' book.author.name %}" class="author-link">
-                                {{ book.author.name }}
-                            </a>
-                            {% else %}
-                                {{ book.author.name }}
-                            {% endif %}
+    <!-- Навигация по вкладкам работать-->
+    <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="books-tab" data-bs-toggle="tab" data-bs-target="#books" type="button" role="tab" aria-controls="books" aria-selected="true">Книги</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="games-tab" data-bs-toggle="tab" data-bs-target="#games" type="button" role="tab" aria-controls="games" aria-selected="false">Игры</button>
+        </li>
+    </ul>
 
-                        </td>
-                        <td>
-                            <a href="{% url 'book_details' book.id %}" class="btn btn-info">Подробнее</a>
-                            <a href="{% url 'edit_book' book.id %}" class="btn btn-warning">Редактировать</a>
-                            <a href="{% url 'delete_book' book.id %}" class="btn btn-danger">Удалить</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <div class="text-center mt-4">
-        <a href="{% url 'add_book' %}" class="btn btn-primary" style="color: #000000;">Добавить книгу</a>
-    </div>
+    <!-- Содержимое вкладок -->
+    <div class="tab-content" id="myTabContent">
+        <!-- Вкладка Книги -->
+        <div class="tab-pane fade show active" id="books" role="tabpanel" aria-labelledby="books-tab">
+            <h2 class="text-center mb-4">Ваши книги:</h2>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" style="color: #ffffff;">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">Название</th>
+                            <th scope="col">Рейтинг</th>
+                            <th scope="col">Автор</th>
+                            <th scope="col">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for book in books %}
+                            <tr>
+                                <td>{{ book.title }}</td>
+                                <td>
+                                    {% if book.rating %}
+                                        {{ book.rating }}/10
+                                    {% else %}
+                                        Не оценено
+                                    {% endif %}
+                                </td>
+                                <td>{{ book.author.name }}</td>
+                                <td>
+                                    <a href="{% url 'book_details' book.id %}" class="btn btn-info">Подробнее</a>
+                                    <a href="{% url 'edit_book' book.id %}" class="btn btn-warning">Редактировать</a>
+                                    <a href="{% url 'delete_book' book.id %}" class="btn btn-danger">Удалить</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-center mt-4">
+                <a href="{% url 'add_book' %}" class="btn btn-primary" style="color: #000000;">Добавить книгу</a>
+            </div>
+        </div>
 
-    <h2 class="text-center mb-4 mt-5">Ваши игры:</h2>
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover" style="color: #ffffff;">
-            <thead class="table-dark">
-                <tr>
-                    <th scope="col">Название</th>
-                    <th scope="col">Рейтинг</th>
-                    <th scope="col">Разработчик</th>
-                    <th scope="col">Действия</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for game in games %}
-                    <tr>
-                        <td>{{ game.title }}</td>
-                        <td>
-                            {% if game.rating %}
-                                {{ game.rating }}/10
-                            {% else %}
-                                Не оценено
-                            {% endif %}
-                        </td>
-                        <td>{{ game.developer.name }}</td>
-                        <td>
-                            <a href="{% url 'game_detail' game.id %}" class="btn btn-info">Подробнее</a>
-                            <a href="{% url 'edit_game' game.id %}" class="btn btn-warning">Редактировать</a>
-                            <a href="{% url 'delete_game' game.id %}" class="btn btn-danger">Удалить</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <div class="text-center mt-4">
-        <a href="{% url 'add_game' %}" class="btn btn-primary" style="color: #000000;">Добавить игру</a>
+        <!-- Вкладка Игры -->
+        <div class="tab-pane fade" id="games" role="tabpanel" aria-labelledby="games-tab">
+            <h2 class="text-center mb-4 mt-4">Ваши игры:</h2>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" style="color: #ffffff;">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">Название</th>
+                            <th scope="col">Рейтинг</th>
+                            <th scope="col">Разработчик</th>
+                            <th scope="col">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for game in games %}
+                            <tr>
+                                <td>{{ game.title }}</td>
+                                <td>
+                                    {% if game.rating %}
+                                        {{ game.rating }}/10
+                                    {% else %}
+                                        Не оценено
+                                    {% endif %}
+                                </td>
+                                <td>{{ game.developer.name }}</td>
+                                <td>
+                                    <a href="{% url 'game_detail' game.id %}" class="btn btn-info">Подробнее</a>
+                                    <a href="{% url 'edit_game' game.id %}" class="btn btn-warning">Редактировать</a>
+                                    <a href="{% url 'delete_game' game.id %}" class="btn btn-danger">Удалить</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-center mt-4">
+                <a href="{% url 'add_game' %}" class="btn btn-primary" style="color: #000000;">Добавить игру</a>
+            </div>
+        </div>
     </div>
 </div>
-
-<style>
-.author-link {
-color: inherit; /* Наследует цвет текста родительского элемента */
-text-decoration: none; /* Убирает подчеркивание */
-}
-</style>
 {% endblock %}

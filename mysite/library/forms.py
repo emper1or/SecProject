@@ -16,6 +16,7 @@ class BookForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['author'].required = False
+
         self.fields['rating'].widget = forms.Select(choices=[(i, f"{i}/10") for i in range(1, 11)])
         self.fields['rating'].label = "Рейтинг книги"
 
