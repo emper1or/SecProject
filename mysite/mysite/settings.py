@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-p9=1r7!%ou$1s0k)=ktf+(f!8bl$yg(h=&$*98)7$&g)@$10mo'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 # Если вы хотите разрешить доступ с любого хоста (что не рекомендуется в продакшене), вы можете использовать:
