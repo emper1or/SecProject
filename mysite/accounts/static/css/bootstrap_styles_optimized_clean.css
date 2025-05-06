@@ -5781,7 +5781,7 @@ header.masthead .bg-circle-4 {
     border-bottom: none;
     font-weight: bold;
     position: relative;
-    top: 2px;
+    top: 0px;
     z-index: 2;
 }
 
