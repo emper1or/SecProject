@@ -358,18 +358,36 @@ def logout_view(request):
     return redirect('home')
 
 
+from django.core.paginator import Paginator
+
+
 @login_required
 def dashboard(request):
     user = request.user
-    books = Book.objects.filter(users=user)
-    games = Game.objects.filter(users=user)
-    book_covers = BookCover.objects.filter(book__in=books)
-    game_covers = GameCover.objects.filter(game__in=games)
+
+    # Получаем параметры пагинации из GET-запроса
+    books_page_number = request.GET.get('books_page', 1)
+    games_page_number = request.GET.get('games_page', 1)
+
+    # Получаем все книги и игры пользователя
+    all_books = Book.objects.filter(users=user).order_by('title')
+    all_games = Game.objects.filter(users=user).order_by('title')
+
+    # Создаем пагинаторы
+    books_paginator = Paginator(all_books, 15)  # 15 книг на страницу
+    games_paginator = Paginator(all_games, 15)  # 15 игр на страницу
+
+    # Получаем текущие страницы
+    books_page = books_paginator.get_page(books_page_number)
+    games_page = games_paginator.get_page(games_page_number)
+
+    book_covers = BookCover.objects.filter(book__in=books_page)
+    game_covers = GameCover.objects.filter(game__in=games_page)
 
     context = {
         'user': user,
-        'books': books,
-        'games': games,
+        'books_page': books_page,
+        'games_page': games_page,
         'book_covers': book_covers,
         'game_covers': game_covers,
     }
