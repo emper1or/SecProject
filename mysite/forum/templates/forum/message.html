@@ -1,6 +1,6 @@
 {% load static %}
 
-<div class="message-card card mb-3" id="message-{{ message.id }}">
+<div class="message-card card mb-3" id="message-{{ message.id }}" data-depth="{{ message.depth }}">
     <div class="card-body">
         <!-- Заголовок сообщения -->
         <div class="d-flex justify-content-between mb-2">
@@ -52,16 +52,19 @@
                     <span class="dislike-count">{{ message.dislikes_count }}</span>
                 </button>
 
-                <!-- Кнопка ответа -->
+                <!-- Кнопка ответа (скрывается при достижении максимальной глубины) -->
+                {% if message.depth < 4 %}
                 <button class="btn btn-sm btn-outline-primary reply-btn"
                         data-message-id="{{ message.id }}"
                         {% if not user.is_authenticated %}disabled{% endif %}>
                     <i class="fas fa-reply"></i> Ответить
                 </button>
+                {% endif %}
             </form>
         </div>
 
-        <!-- Форма ответа -->
+        <!-- Форма ответа (показывается только если глубина меньше максимальной) -->
+        {% if message.depth < 4 %}
         <div class="reply-form mt-3" id="reply-form-{{ message.id }}" style="display: none;">
             <form method="post" action="{% url 'add_message' message.topic.id %}" class="ajax-reply-form">
                 {% csrf_token %}
@@ -90,12 +93,13 @@
                 </div>
             </form>
         </div>
+        {% endif %}
     </div>
 </div>
 
-<!-- Контейнер для ответов -->
-{% if message.replies.all %}
-<div class="replies ms-4 mt-2">
+<!-- Контейнер для ответов (показывается только если глубина меньше максимальной) -->
+{% if message.replies.all and message.depth < 4 %}
+<div class="replies ms-4 mt-2" style="border-left: 2px solid #eee; padding-left: 15px;">
     {% for reply in message.replies.all %}
         {% include 'forum/message.html' with message=reply %}
     {% endfor %}

@@ -32,9 +32,15 @@ class Message(models.Model):
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
     content = models.TextField()
     created_at = models.DateTimeField(default=timezone.now)
+    depth = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         ordering = ['created_at']
+
+    def save(self, *args, **kwargs):
+        if self.parent:
+            self.depth = self.parent.depth + 1
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.author.username}: {self.content[:50]}..."
