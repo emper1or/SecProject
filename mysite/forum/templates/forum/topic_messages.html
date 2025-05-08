@@ -214,7 +214,7 @@ async function handleReplyFormSubmit(form) {
             // Сбрасываем и скрываем форму
             form.reset();
             form.style.display = 'none';
-
+            window.location.reload()
             // Прокручиваем к новому ответу
             newMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
