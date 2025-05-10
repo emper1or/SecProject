@@ -89,6 +89,8 @@
 </div>
 
 <script>
+const MAX_REPLY_DEPTH = 4;
+
 // Функция для получения CSRF токена
 function getCookie(name) {
     let cookieValue = null;
@@ -170,6 +172,13 @@ async function handleReplyFormSubmit(form) {
     const csrfToken = getCookie('csrftoken');
     const parentId = formData.get('parent_id');
     const submitButton = form.querySelector('button[type="submit"]');
+    const parentElement = document.getElementById(`message-${parentId}`);
+    const currentDepth = parseInt(parentElement.dataset.depth) || 0;
+
+    if (currentDepth >= MAX_REPLY_DEPTH) {
+        alert(`Достигнута максимальная глубина вложенности (${MAX_REPLY_DEPTH}). Нельзя отвечать на этот комментарий.`);
+        return false;
+    }
 
     // Блокируем кнопку во избежание повторных отправок
     submitButton.disabled = true;
@@ -214,7 +223,7 @@ async function handleReplyFormSubmit(form) {
             // Сбрасываем и скрываем форму
             form.reset();
             form.style.display = 'none';
-
+            window.location.reload()
             // Прокручиваем к новому ответу
             newMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
@@ -318,6 +327,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target.closest('.reply-btn')) {
             e.preventDefault();
             const messageId = e.target.closest('.reply-btn').dataset.messageId;
+            const messageElement = document.getElementById(`message-${messageId}`);
+            const currentDepth = parseInt(messageElement.dataset.depth) || 0;
+
+            if (currentDepth >= MAX_REPLY_DEPTH) {
+                alert(`Достигнута максимальная глубина вложенности (${MAX_REPLY_DEPTH}). Нельзя отвечать на этот комментарий.`);
+                return;
+            }
+
             const replyForm = document.getElementById(`reply-form-${messageId}`);
 
             // Скрываем все другие формы ответов
@@ -326,18 +343,11 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             // Переключаем видимость текущей формы
-            replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
+            replyForm.style.display = replyForm.style.display === 'block' ? 'none' : 'block';
 
-            // Фокусируемся на textarea при открытии формы
             if (replyForm.style.display === 'block') {
                 setTimeout(() => replyForm.querySelector('textarea').focus(), 100);
             }
-        }
-
-        // Обработчик отмены ответа
-        if (e.target.closest('.cancel-reply')) {
-            e.preventDefault();
-            e.target.closest('.reply-form').style.display = 'none';
         }
     });
 

@@ -4,7 +4,7 @@
 <div class="container mt-5 ultra-tab-interface">
     <h1 class="text-center mb-4">Личная библиотека</h1>
 
-    <!-- Навигация по вкладкам работать-->
+    <!-- Навигация по вкладкам -->
     <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="books-tab" data-bs-toggle="tab" data-bs-target="#books" type="button" role="tab" aria-controls="books" aria-selected="true">Книги</button>
@@ -30,7 +30,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for book in books %}
+                        {% for book in books_page %}
                             <tr>
                                 <td>{{ book.title }}</td>
                                 <td>
@@ -51,6 +51,48 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Пагинация для книг -->
+            {% if books_page.paginator.num_pages > 1 %}
+            <nav aria-label="Books pagination">
+                <ul class="pagination justify-content-center">
+                    {% if books_page.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?books_page=1&games_page={{ games_page.number }}" aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?books_page={{ books_page.previous_page_number }}&games_page={{ games_page.number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in books_page.paginator.page_range %}
+                        {% if books_page.number == num %}
+                            <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                        {% elif num > books_page.number|add:'-3' and num < books_page.number|add:'3' %}
+                            <li class="page-item"><a class="page-link" href="?books_page={{ num }}&games_page={{ games_page.number }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if books_page.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?books_page={{ books_page.next_page_number }}&games_page={{ games_page.number }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?books_page={{ books_page.paginator.num_pages }}&games_page={{ games_page.number }}" aria-label="Last">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            
             <div class="text-center mt-4">
                 <a href="{% url 'add_book' %}" class="btn btn-primary" style="color: #000000;">Добавить книгу</a>
             </div>
@@ -70,7 +112,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for game in games %}
+                        {% for game in games_page %}
                             <tr>
                                 <td>{{ game.title }}</td>
                                 <td>
@@ -91,6 +133,48 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Пагинация для игр -->
+            {% if games_page.paginator.num_pages > 1 %}
+            <nav aria-label="Games pagination">
+                <ul class="pagination justify-content-center">
+                    {% if games_page.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?games_page=1&books_page={{ books_page.number }}" aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?games_page={{ games_page.previous_page_number }}&books_page={{ books_page.number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in games_page.paginator.page_range %}
+                        {% if games_page.number == num %}
+                            <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                        {% elif num > games_page.number|add:'-3' and num < games_page.number|add:'3' %}
+                            <li class="page-item"><a class="page-link" href="?games_page={{ num }}&books_page={{ books_page.number }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if games_page.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?games_page={{ games_page.next_page_number }}&books_page={{ books_page.number }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?games_page={{ games_page.paginator.num_pages }}&books_page={{ books_page.number }}" aria-label="Last">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            
             <div class="text-center mt-4">
                 <a href="{% url 'add_game' %}" class="btn btn-primary" style="color: #000000;">Добавить игру</a>
             </div>

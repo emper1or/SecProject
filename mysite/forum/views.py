@@ -174,7 +174,7 @@ def delete_topic(request, topic_id):
     return redirect('category_topics', category_id=topic.category.id)
 
 
-
+MAX_REPLY_DEPTH = 4
 @login_required
 def add_message(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
@@ -187,6 +187,18 @@ def add_message(request, topic_id):
                 return JsonResponse({'success': False, 'error': 'Пустое сообщение'}, status=400)
             messages.error(request, 'Сообщение не может быть пустым')
             return redirect('topic_messages', topic_id=topic.id)
+
+        # Для ответов проверяем глубину вложенности
+        if parent_id:
+            parent_message = get_object_or_404(Message, id=parent_id)
+            if parent_message.depth >= MAX_REPLY_DEPTH:
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': False,
+                        'error': f'Максимальная глубина вложенности ({MAX_REPLY_DEPTH}) достигнута'
+                    }, status=400)
+                messages.error(request, f'Максимальная глубина вложенности ({MAX_REPLY_DEPTH}) достигнута')
+                return redirect('topic_messages', topic_id=topic.id)
 
         # Для новых сообщений (не ответов)
         if not parent_id:
