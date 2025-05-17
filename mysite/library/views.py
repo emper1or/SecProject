@@ -152,8 +152,10 @@ def autocomplete(request):
 
 def book_detail(request, book_id):
     # Получаем полные данные о книге
-    book_data = get_book_details(book_id)
-    print(book_data)
+    if book_id.isdigit():
+        book_data = get_book_details_isbn(book_id)
+    else:
+        book_data = get_book_details(book_id)
 
     if request.method == 'POST':
         # Проверяем наличие автора
@@ -233,13 +235,10 @@ def book_detail(request, book_id):
 def book_search_isbn(request):
     if request.method == 'POST':
         isbn = request.POST.get('isbn')
-        book_data = get_book_details_isbn(isbn)
-        return render(request, 'book_details_test.html', {'book': book_data})
+        return redirect('book_detail', book_id=isbn)
     # Получаем полные данные о книге
     return render(request, 'search_isbn.html')
 
-
-# books/views.py
 
 def author_detail(request, author_name):
     api_data = get_author_info(author_name)
