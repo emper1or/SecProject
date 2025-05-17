@@ -105,6 +105,9 @@
                             {% if field.errors %}
                                 <div class="invalid-feedback">{{ field.errors }}</div>
                             {% endif %}
+                            <p>
+                                <button type="submit" name="add_author" class="btn btn-secondary">Добавить нового автора</button>
+                            </p>
                         </div>
                     {% elif field.name != "rating" %}
                         <div class="mb-3 form-group">
