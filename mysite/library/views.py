@@ -11,7 +11,8 @@ from .models import Author, Book, BookCover
 
 import requests
 from django.core.files.base import ContentFile
-
+import base64
+import json
 
 def clear_cache_for_book(book_id):
     """Удаляет все связанные с книгой ключи кэша"""
@@ -170,8 +171,40 @@ def book_detail(request, book_id):
     book_data = cache.get(cache_key)
 
     if not book_data:
-        book_data = get_book_details(book_id)
+        if book_id.isdigit():
+            book_data = get_book_details_isbn(book_id)
+        else:
+            book_data = get_book_details(book_id)
         cache.set(cache_key, book_data, 60 * 15)
+
+    response = render(request, 'book_details_test.html', {'book': book_data})
+
+    # Получаем текущие cookies или создаем пустой список
+    recent_books = request.COOKIES.get('recent_books', '').split('|')
+    recent_books = [b for b in recent_books if b]  # Удаляем пустые значения
+
+    # Кодируем данные книги в base64 для безопасного хранения в cookies
+
+    book_info = {
+        'id': book_id,
+        'title': book_data.get('title', ''),
+        'cover': book_data.get('cover', '')
+    }
+
+    # Преобразуем в JSON и затем в base64
+    book_info_json = json.dumps(book_info, ensure_ascii=False)
+    book_info_encoded = base64.urlsafe_b64encode(book_info_json.encode('utf-8')).decode('ascii')
+
+    # Обновляем список (удаляем дубликаты, если есть)
+    if book_info_encoded in recent_books:
+        recent_books.remove(book_info_encoded)
+    recent_books.insert(0, book_info_encoded)
+
+    # Ограничиваем количество книг
+    recent_books = recent_books[:10]
+
+    # Устанавливаем cookie на 30 дней
+    response.set_cookie('recent_books', '|'.join(recent_books), max_age=30 * 24 * 60 * 60)
 
     if request.method == 'POST':
         authors_list = book_data.get('authors', [])
@@ -236,7 +269,7 @@ def book_detail(request, book_id):
         clear_cache_for_book(book_id)
         return render(request, 'book_details_test.html', {'book': book_data, 'saved': True})
 
-    return render(request, 'book_details_test.html', {'book': book_data})
+    return response
 
 
 def book_search_isbn(request):
@@ -275,3 +308,27 @@ def author_detail(request, author_name):
     }
 
     return render(request, 'author_detail_test.html', context)
+
+
+def recent_books_view(request):
+    recent_books = []
+    if 'recent_books' in request.COOKIES:
+        book_infos = request.COOKIES['recent_books'].split('|')
+
+        for encoded_info in book_infos:
+            if not encoded_info:
+                continue
+
+            try:
+                decoded_info = base64.urlsafe_b64decode(encoded_info.encode('ascii')).decode('utf-8')
+                book_info = json.loads(decoded_info)
+
+                recent_books.append({
+                    'id': book_info.get('id'),
+                    'title': book_info.get('title'),
+                    'cover': book_info.get('cover')
+                })
+            except (UnicodeError, json.JSONDecodeError, base64.binascii.Error):
+                continue
+
+    return render(request, 'recent_books.html', {'recent_books': recent_books})

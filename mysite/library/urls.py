@@ -13,4 +13,5 @@ urlpatterns = [
     path('autocomplete/', views.autocomplete, name='autocomplete'),
     path('detail/<str:book_id>/', views.book_detail, name='book_detail'),
     path('author/<str:author_name>/', views.author_detail, name='author_detail'),
+    path('recent-books/', views.recent_books_view , name='recent_books')
 ]
