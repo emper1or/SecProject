@@ -3,12 +3,25 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .utils import get_book_suggestions, get_book_details, get_author_info, get_book_details_isbn
 from django.http import JsonResponse
+from django.core.cache import cache
+from django.views.decorators.cache import cache_page
 
 from .forms import BookForm, BookCoverForm
 from .models import Author, Book, BookCover
 
 import requests
 from django.core.files.base import ContentFile
+
+
+def clear_cache_for_book(book_id):
+    """Удаляет все связанные с книгой ключи кэша"""
+    cache.delete(f'book_detail_{book_id}')
+    # Дополнительные ключи кэша, которые нужно очистить
+    cache.delete_many([
+        f'autocomplete_{book_id}',
+        f'book_search_{book_id}',
+    ])
+
 
 @login_required
 def add_author(request):
@@ -18,9 +31,9 @@ def add_author(request):
 
         if name:
             author = Author.objects.create(name=name, bio=bio)
-            request.session['book_form_data']['author'] = author.id  # Запоминаем нового автора
+            request.session['book_form_data']['author'] = author.id
             messages.success(request, "Автор успешно добавлен!")
-            return redirect('add_book')  # Возвращаемся на add_book без потери данных
+            return redirect('add_book')
 
     return render(request, 'add_author.html')
 
@@ -28,15 +41,12 @@ def add_author(request):
 @login_required
 def add_book(request):
     authors = Author.objects.all()
-
-    # Получаем данные из сессии
     initial_data = request.session.get('book_form_data', {})
-    initial_rating = initial_data.get('rating', 5)  # Значение по умолчанию
+    initial_rating = initial_data.get('rating', 5)
     initial_cover = request.session.get('book_cover', None)
 
     if request.method == 'POST':
         if 'add_author' in request.POST:
-            # Сохраняем все данные перед переходом на страницу добавления автора
             request.session['book_form_data'] = request.POST.dict()
             request.session['book_cover'] = request.FILES.get('cover').name if 'cover' in request.FILES else None
             return redirect('add_author')
@@ -53,12 +63,10 @@ def add_book(request):
             if hasattr(book, 'users'):
                 book.users.add(request.user)
 
-            # Сохраняем обложку
             cover = cover_form.save(commit=False)
             cover.book = book
             cover.save()
 
-            # Очищаем сессию после успешного сохранения
             request.session.pop('book_form_data', None)
             request.session.pop('book_cover', None)
 
@@ -92,8 +100,6 @@ def book_details(request, pk):
 @login_required
 def edit_book(request, pk):
     book = get_object_or_404(Book, id=pk)
-
-    # Получаем первую обложку книги (если она существует)
     book_cover = book.bookcover_set.first()
 
     if request.method == 'POST':
@@ -103,18 +109,17 @@ def edit_book(request, pk):
         if book_form.is_valid() and cover_form.is_valid():
             book_form.save()
 
-            # Если у книги уже есть обложка, удаляем её файл
             if 'cover' in cover_form.changed_data:
                 covers = BookCover.objects.filter(book=book)
                 for cover in covers:
                     cover.cover.delete()
                     cover.delete()
 
-            # Сохраняем новую обложку
             cover = cover_form.save(commit=False)
-            cover.book = book  # Связываем обложку с книгой
+            cover.book = book
             cover.save()
 
+            clear_cache_for_book(book.id)
             return redirect('book_details', pk=book.id)
     else:
         book_form = BookForm(instance=book)
@@ -135,79 +140,80 @@ def delete_book(request, pk):
         for cover in covers:
             cover.cover.delete()
             cover.delete()
+        book_id = book.id
         book.delete()
+        clear_cache_for_book(book_id)
         return redirect('dashboard')
     return render(request, 'delete_book.html', {'book': book})
 
 
+@cache_page(60 * 15)
 def book_search(request):
     return render(request, 'search.html')
 
 
 def autocomplete(request):
     query = request.GET.get('term', '')
-    suggestions = get_book_suggestions(query)
+    cache_key = f'autocomplete_{query}'
+    suggestions = cache.get(cache_key)
+
+    if not suggestions:
+        suggestions = get_book_suggestions(query)
+        cache.set(cache_key, suggestions, 60 * 15)
+
     return JsonResponse(suggestions, safe=False)
 
 
+@cache_page(60 * 15)
 def book_detail(request, book_id):
-    # Получаем полные данные о книге
-    if book_id.isdigit():
-        book_data = get_book_details_isbn(book_id)
-    else:
+    cache_key = f'book_detail_{book_id}'
+    book_data = cache.get(cache_key)
+
+    if not book_data:
         book_data = get_book_details(book_id)
+        cache.set(cache_key, book_data, 60 * 15)
 
     if request.method == 'POST':
-        # Проверяем наличие автора
         authors_list = book_data.get('authors', [])
-        if authors_list and authors_list[0]:  # Проверяем, что первый автор существует
+        if authors_list and authors_list[0]:
             author_name = authors_list[0]
             api_data = get_author_info(author_name)
             author, created = Author.objects.get_or_create(name=author_name, bio=api_data.get('bio'))
         else:
-            # Создаем "анонимного" автора
             author, created = Author.objects.get_or_create(name="Неизвестный автор")
 
-        # Проверяем, существует ли книга
         book, created = Book.objects.get_or_create(
             title=book_data.get('title'),
             defaults={
                 'description': book_data.get('description'),
-                'review': '',  # Поле отзыва можно оставить пустым
+                'review': '',
                 'rating': book_data.get('rating', 0),
-                'author': author,  # Назначаем автора
+                'author': author,
             }
         )
 
-        # Если книга уже существует, обновляем её поля
         if not created:
             book.description = book_data.get('description')
             book.review = ''
             book.rating = book_data.get('rating', 0)
-            book.author = author  # Обновляем автора
+            book.author = author
             book.save()
 
-        # Связываем книгу с текущим пользователем
         if request.user.is_authenticated:
-            book.users.add(request.user)  # Добавляем пользователя в поле users
+            book.users.add(request.user)
 
-        # Сохраняем обложку книги
         if book_data.get('cover'):
-            # Проверяем, является ли обложка внешней ссылкой
             cover_url = book_data.get('cover')
             if cover_url.startswith(('http://', 'https://')):
-                # Скачиваем изображение с внешнего URL
                 response = requests.get(cover_url)
                 if response.status_code == 200:
-                    # Создаем объект BookCover и сохраняем изображение
                     cover, created = BookCover.objects.get_or_create(book=book)
                     cover.cover.save(
-                        f"{book.title}_cover.jpg",  # Имя файла
-                        ContentFile(response.content)  # Содержимое файла
+                        f"{book.title}_cover.jpg",
+                        ContentFile(response.content)
                     )
                     cover.save()
             else:
-                # Если это уже локальный файл, сохраняем его напрямую
                 cover, created = BookCover.objects.get_or_create(
                     book=book,
                     defaults={'cover': cover_url}
@@ -216,7 +222,6 @@ def book_detail(request, book_id):
                     cover.cover = cover_url
                     cover.save()
 
-        # Обновляем рейтинг и отзыв
         rating = request.POST.get('rating')
         review = request.POST.get('review')
 
@@ -227,6 +232,8 @@ def book_detail(request, book_id):
 
         book.save()
 
+        # Очищаем кэш для этой книги
+        clear_cache_for_book(book_id)
         return render(request, 'book_details_test.html', {'book': book_data, 'saved': True})
 
     return render(request, 'book_details_test.html', {'book': book_data})
@@ -235,15 +242,26 @@ def book_detail(request, book_id):
 def book_search_isbn(request):
     if request.method == 'POST':
         isbn = request.POST.get('isbn')
-        return redirect('book_detail', book_id=isbn)
-    # Получаем полные данные о книге
+        cache_key = f'book_search_isbn_{isbn}'
+        book_data = cache.get(cache_key)
+
+        if not book_data:
+            book_data = get_book_details_isbn(isbn)
+            cache.set(cache_key, book_data, 60 * 15)
+
+        return render(request, 'book_details_test.html', {'book': book_data})
     return render(request, 'search_isbn.html')
 
 
+@cache_page(60 * 15)
 def author_detail(request, author_name):
-    api_data = get_author_info(author_name)
+    cache_key = f'author_detail_{author_name}'
+    api_data = cache.get(cache_key)
 
-    # Объединяем данные
+    if not api_data:
+        api_data = get_author_info(author_name)
+        cache.set(cache_key, api_data, 60 * 15)
+
     context = {
         'author': {
             'name': author_name,

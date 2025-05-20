@@ -1,10 +1,14 @@
 {% extends 'index.html' %}
+{% load cache %}
 
 {% block content %}
 <div class="search-container">
     <h1>Поиск книг</h1>
     <input type="text" id="book-search" placeholder="Введите название книги...">
+
+    {% cache 600 search_results request.GET.q %}
     <div id="search-results"></div>
+    {% endcache %}
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -29,7 +33,6 @@ $(function() {
         },
         minLength: 2,
         select: function(event, ui) {
-            // Перенаправляем на страницу с деталями книги
             window.location.href = "{% url 'book_detail' 'BOOK_ID' %}".replace('BOOK_ID', ui.item.id);
         }
     });
