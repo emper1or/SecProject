@@ -204,7 +204,7 @@ def book_detail(request, book_id):
     recent_books = recent_books[:10]
 
     # Устанавливаем cookie на 30 дней
-    response.set_cookie('recent_books', '|'.join(recent_books), max_age=30 * 24 * 60 * 60)
+    response.set_cookie('recent_books', '|'.join(recent_books), max_age=7 * 24 * 60 * 60)
 
     if request.method == 'POST':
         authors_list = book_data.get('authors', [])
