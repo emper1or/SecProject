@@ -169,14 +169,14 @@ def autocomplete(request):
 def book_detail(request, book_id):
     cache_key = f'book_detail_{book_id}'
     book_data = cache.get(cache_key)
-
+    print(book_data)
     if not book_data:
         if book_id.isdigit():
             book_data = get_book_details_isbn(book_id)
         else:
             book_data = get_book_details(book_id)
         cache.set(cache_key, book_data, 60 * 15)
-
+    print(book_data)
     response = render(request, 'book_details_test.html', {'book': book_data})
 
     # Получаем текущие cookies или создаем пустой список
@@ -204,7 +204,7 @@ def book_detail(request, book_id):
     recent_books = recent_books[:10]
 
     # Устанавливаем cookie на 30 дней
-    response.set_cookie('recent_books', '|'.join(recent_books), max_age=7 * 24 * 60 * 60)
+    response.set_cookie('recent_books', '|'.join(recent_books), max_age=24 * 60 * 60)
 
     if request.method == 'POST':
         authors_list = book_data.get('authors', [])
@@ -275,14 +275,8 @@ def book_detail(request, book_id):
 def book_search_isbn(request):
     if request.method == 'POST':
         isbn = request.POST.get('isbn')
-        cache_key = f'book_search_isbn_{isbn}'
-        book_data = cache.get(cache_key)
-
-        if not book_data:
-            book_data = get_book_details_isbn(isbn)
-            cache.set(cache_key, book_data, 60 * 15)
-
-        return render(request, 'book_details_test.html', {'book': book_data})
+        return redirect('book_detail', book_id=isbn)
+    # Получаем полные данные о книге
     return render(request, 'search_isbn.html')
 
 
